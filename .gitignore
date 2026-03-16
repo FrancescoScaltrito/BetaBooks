@@ -1,0 +1,122 @@
+# ==========================================
+# JAVA / SPRING BOOT
+# ==========================================
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+replay_pid*
+
+# Maven
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# ==========================================
+# CONFIGURAZIONI LOCALI (MAI NEL REPO)
+# ==========================================
+application-local.properties
+application-local.yml
+application-local.yaml
+*-local.properties
+*-local.yml
+.env
+.env.*
+!.env.example
+
+# ==========================================
+# ANGULAR / NODE
+# ==========================================
+node_modules/
+dist/
+tmp/
+out-tsc/
+bazel-out/
+.angular/cache/
+
+# npm / yarn / pnpm
+.npm
+.yarn/cache
+.pnpm-store/
+package-lock.json
+yarn.lock
+
+# Angular specifico
+*.js.map
+*.d.ts
+
+# ==========================================
+# IDE - IntelliJ / WebStorm
+# ==========================================
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+.idea_modules/
+
+# ==========================================
+# IDE - VS Code
+# ==========================================
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# ==========================================
+# IDE - Eclipse
+# ==========================================
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+# ==========================================
+# SISTEMA OPERATIVO
+# ==========================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encdata
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# ==========================================
+# LOG E DATABASE LOCALI
+# ==========================================
+*.log
+logs/
+*.sql.bak
+*.db
+*.sqlite
+*.h2.db
+
+# ==========================================
+# DOCKER (file locali, non il Dockerfile)
+# ==========================================
+docker-compose.override.yml
