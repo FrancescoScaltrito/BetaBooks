@@ -14,13 +14,12 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
-@Entity
-@Table(name = "recensione", uniqueConstraints = {@UniqueConstraint(columnNames = {"id_utente", "id_libro"})})
+@Getter @Setter @Entity
+@Table(name = "recensioni", uniqueConstraints = {@UniqueConstraint(columnNames = {"id_utente", "id_libro"})})
 public class Recensione {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_recensione")
     private Long id;
 
     @ManyToOne
@@ -31,11 +30,12 @@ public class Recensione {
     @JoinColumn(name = "id_libro")
     private Libro libro;
 
-    @Column(nullable = false)
-    private Short valutazione; // tra 1 e 5
+    @Column(name = "valutazione", nullable = false)
+    private Short valutazione;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "testo", columnDefinition = "TEXT")
     private String descrizione;
 
+    @Column(name = "data_pubblicazione")
     private LocalDateTime data = LocalDateTime.now();
 }

@@ -13,6 +13,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LibroReq {
+	private Long id;
     private String titolo;
     private String isbn;
     private BigDecimal prezzo;

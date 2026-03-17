@@ -11,6 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 
 public class EditoreReq {
+	private Long id;
     private String nome;
     private String descrizione;
 }

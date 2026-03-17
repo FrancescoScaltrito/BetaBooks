@@ -1,6 +1,7 @@
 package com.betacom.betabooks.models;
 
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,13 +13,12 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
-@Entity
+@Getter @Setter @Entity
 @Table(name = "wishlist", uniqueConstraints = {@UniqueConstraint(columnNames = {"id_utente", "id_libro"})})
 public class Wishlist {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_wishlist")
     private Long id;
 
     @ManyToOne

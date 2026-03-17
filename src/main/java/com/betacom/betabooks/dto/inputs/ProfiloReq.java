@@ -10,6 +10,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProfiloReq {
+	private Long id;
     private Long idUtente;
     private String nome;
     private String cognome;

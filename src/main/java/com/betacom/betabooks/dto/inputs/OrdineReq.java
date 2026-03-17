@@ -12,6 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrdineReq {
+	private Long id;
     private Long idUtente;
     private Long idIndirizzo;
     private String metodoPagamento;

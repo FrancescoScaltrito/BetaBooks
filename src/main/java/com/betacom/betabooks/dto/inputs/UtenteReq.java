@@ -10,6 +10,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UtenteReq {
+	private Long id;
     private String email;
     private String password;
     private String ruolo;

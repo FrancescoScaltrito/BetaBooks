@@ -12,20 +12,22 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "autore")
+@Table(name = "autori")
 public class Autore {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_autore")
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "nome", nullable = false)
     private String nome;
 
-    @Column(nullable = false)
+    @Column(name = "cognome", nullable = false)
     private String cognome;
 
+    @Column(name = "nazionalita")
     private String nazionalita;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "biografia", columnDefinition = "TEXT")
     private String biografia;
 }

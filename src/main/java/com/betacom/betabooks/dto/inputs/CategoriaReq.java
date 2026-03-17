@@ -11,6 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 
 public class CategoriaReq {
+	private Long id;
     private String nome;
     private String descrizione;
 }

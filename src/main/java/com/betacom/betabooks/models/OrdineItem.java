@@ -13,26 +13,25 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
-@Entity
-@Table(name = "ordine_item")
+@Getter @Setter @Entity
+@Table(name = "ordine_items")
 public class OrdineItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_ordine_item")
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "id_libro", nullable = false)
     private Libro libro;
 
-    @Column(nullable = false)
+    @Column(name = "quantita_ordinata", nullable = false)
     private Integer quantita;
 
     @ManyToOne
     @JoinColumn(name = "id_ordine", nullable = false)
     private Ordine ordine;
 
-    @Column(name = "prezzo_unitario_acquisto", nullable = false)
+    @Column(name = "prezzo_unitario_storico", nullable = false, precision = 10, scale = 2)
     private BigDecimal prezzoUnitarioAcquisto;
 }

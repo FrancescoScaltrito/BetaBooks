@@ -11,6 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 
 public class WishlistReq {
+	private Long id;
     private Long idUtente;
     private Long idLibro;
 }

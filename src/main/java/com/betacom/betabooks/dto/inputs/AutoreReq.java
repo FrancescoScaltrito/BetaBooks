@@ -11,6 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 
 public class AutoreReq {
+	private Long id;
     private String nome;
     private String cognome;
     private String nazionalita;

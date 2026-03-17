@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CarrelloItemDTO {
+public class CarrelloDTO {
     private Long id;
     private LibroDTO libro; 
     private Integer quantita;

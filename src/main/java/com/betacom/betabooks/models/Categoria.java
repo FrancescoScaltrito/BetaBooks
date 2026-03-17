@@ -12,15 +12,16 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "categoria")
+@Table(name = "categorie")
 public class Categoria {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_categoria")
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "nome", nullable = false, unique = true)
     private String nome;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "descrizione", columnDefinition = "TEXT")
     private String descrizione;
 }

@@ -11,6 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 
 public class IndirizzoReq {
+	private Long id;
     private Long idUtente;
     private String via;
     private String civico;

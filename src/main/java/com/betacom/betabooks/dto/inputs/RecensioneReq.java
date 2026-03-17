@@ -11,6 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 
 public class RecensioneReq {
+	private Long id;
     private Long idUtente;
     private Long idLibro;
     private Short valutazione; // 1-5

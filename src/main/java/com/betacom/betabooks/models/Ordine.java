@@ -19,23 +19,22 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
-@Entity
-@Table(name = "ordine")
+@Getter @Setter @Entity
+@Table(name = "ordini")
 public class Ordine {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_ordine")
     private Long id;
 
-    @Column(name = "data_ordine")
+    @Column(name = "data_creazione_ordine")
     private LocalDateTime dataOrdine = LocalDateTime.now();
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "stato_ordine", nullable = false)
     private StatoOrdine stato = StatoOrdine.IN_ATTESA;
 
-    @Column(nullable = false)
+    @Column(name = "prezzo_totale", nullable = false, precision = 10, scale = 2)
     private BigDecimal totale;
 
     @ManyToOne

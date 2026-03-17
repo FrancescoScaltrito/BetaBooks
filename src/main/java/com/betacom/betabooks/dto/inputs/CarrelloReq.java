@@ -9,7 +9,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CarrelloItemReq {
+public class CarrelloReq {
+	private Long id;
     private Long idUtente;
     private Long idLibro;
     private Integer quantita;
