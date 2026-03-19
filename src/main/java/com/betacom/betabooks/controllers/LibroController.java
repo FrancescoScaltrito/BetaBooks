@@ -23,6 +23,7 @@ import com.betacom.betabooks.models.Libro;
 import com.betacom.betabooks.repositories.ILibroRepository;
 import com.betacom.betabooks.response.Resp;
 import com.betacom.betabooks.services.interfaces.ILibroServices;
+import com.betacom.betabooks.utils.Mapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -96,7 +97,7 @@ public class LibroController {
         return ResponseEntity.status(status).body(response);
     }
 
-    @PostMapping(value = "/{id}/copertina", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "createLibroCopertina/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resp> uploadCopertina(
             @PathVariable Long id,
             @RequestPart("file") MultipartFile file) {
@@ -114,7 +115,11 @@ public class LibroController {
         return ResponseEntity.status(status).body(response);
     }
 
-    @GetMapping("/{id}/copertina")
+    /*
+     * Dato ID LIBRO stampa SOLO la copertina
+     */
+    
+    @GetMapping("getCopertinaByIdLibro/{id}")
     public ResponseEntity<byte[]> getCopertina(@PathVariable Long id) {
         log.debug("LibroController - getCopertina libro id {}", id);
         try {
@@ -133,4 +138,41 @@ public class LibroController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
+    
+    /*
+     * 		Stampa completa libro+copertina sia per findbyID che listAll
+     */
+    
+    @GetMapping("getCompletoById/{id}")
+    public ResponseEntity<Object> findByIdCompleto(@PathVariable Long id) {
+        log.debug("LibroController - findByIdCompleto {}", id);
+        Object response = new Object();
+        HttpStatus status = HttpStatus.OK;
+        try {
+            response = libroS.findByIdCompleto(id);
+        } catch (Exception e) {
+            log.error("ERRORE LibroController - " + e.getMessage());
+            response = e.getMessage();
+            status = HttpStatus.BAD_REQUEST;
+        }
+        return ResponseEntity.status(status).body(response);
+    }
+
+    @GetMapping("/getAllCompleto")
+    public ResponseEntity<Object> listAllCompleto() {
+        log.debug("LibroController - listAllCompleto");
+        Object response = new Object();
+        HttpStatus status = HttpStatus.OK;
+        try {
+            response = libroS.findAllCompleto();
+        } catch (Exception e) {
+            log.error("ERRORE LibroController - " + e.getMessage());
+            response = e.getMessage();
+            status = HttpStatus.BAD_REQUEST;
+        }
+        return ResponseEntity.status(status).body(response);
+    }
+    
+    
+    
 }

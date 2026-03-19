@@ -16,5 +16,8 @@ public interface ILibroServices {
 	List<LibroDTO> findAll() throws Exception;
 	
 	void salvaCopertina(Long libroId, MultipartFile file) throws Exception;
+	
+	LibroDTO findByIdCompleto(Long id) throws Exception;
+	List<LibroDTO> findAllCompleto() throws Exception;
 
 }

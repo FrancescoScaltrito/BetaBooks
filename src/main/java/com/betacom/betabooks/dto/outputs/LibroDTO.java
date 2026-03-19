@@ -21,4 +21,5 @@ public class LibroDTO {
     private AutoreDTO autore;
     private EditoreDTO editore;
     private List<CategoriaDTO> categorie;
+    private String copertina;		//aggiunga copertina per stampa libro completa (sequenza di caratteri che interpreterà Angular)
 }

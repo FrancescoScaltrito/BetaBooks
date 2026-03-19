@@ -1,9 +1,11 @@
 package com.betacom.betabooks.services.implementations;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -119,4 +121,37 @@ public class LibroImpl implements ILibroServices{
 	    libro.setCopertinaMimeType(file.getContentType());
 	    libR.save(libro);
 	}
+
+	/*
+	 * stamap il libro/libri con la copertina come testo tutto in Json
+	 */
+	
+	@Override
+	public LibroDTO findByIdCompleto(Long id) throws Exception {
+	    Libro libro = libR.findById(id)
+	            .orElseThrow(() -> new Exception("Libro non trovato"));
+	    return toDTOConCopertina(libro);
+	}
+
+	@Override
+	public List<LibroDTO> findAllCompleto() throws Exception {
+	    return libR.findAll().stream()
+	            .map(this::toDTOConCopertina)
+	            .collect(Collectors.toList());
+	}
+	
+	
+	
+	// metodo per dto
+	
+	private LibroDTO toDTOConCopertina(Libro libro) {
+	    LibroDTO dto = Mapper.buildLibroDTO(libro);
+	    if (libro.getCopertina() != null) {
+	        dto.setCopertina("data:" + libro.getCopertinaMimeType() + ";base64,"
+	                + Base64.getEncoder().encodeToString(libro.getCopertina()));
+	    }
+	    return dto;
+	}
+	
+	
 }
