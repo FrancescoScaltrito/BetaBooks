@@ -19,7 +19,7 @@ import jakarta.persistence.UniqueConstraint;
 @Setter
 @Entity
 @Table(name = "carrello", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"id_utente", "id_libro"})
+    @UniqueConstraint(columnNames = {"id_utente", "id_formato"})
 })
 public class Carrello {
     @Id
@@ -32,8 +32,8 @@ public class Carrello {
     private Utente utente;
 
     @ManyToOne
-    @JoinColumn(name = "id_libro", nullable = false)
-    private Libro libro;
+    @JoinColumn(name = "id_formato", nullable = false)
+    private FormatoLibro formatoLibro;
 
     @Column(name = "quantita")
     private Integer quantita = 1;

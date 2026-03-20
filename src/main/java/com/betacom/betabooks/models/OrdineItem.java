@@ -22,8 +22,8 @@ public class OrdineItem {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "id_libro", nullable = false)
-    private Libro libro;
+    @JoinColumn(name = "id_formato", nullable = false)
+    private FormatoLibro formatoLibro;
 
     @Column(name = "quantita_ordinata", nullable = false)
     private Integer quantita;
