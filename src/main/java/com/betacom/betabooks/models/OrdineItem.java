@@ -17,7 +17,7 @@ import lombok.Setter;
 
 @Getter @Setter @Entity
 @Table(name = "ordine_items", uniqueConstraints = {
-	    @UniqueConstraint(columnNames = {"id_ordine", "id_id_formato"})
+	    @UniqueConstraint(columnNames = {"id_ordine", "id_formato"})
 	})
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class OrdineItem {

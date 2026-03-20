@@ -19,5 +19,7 @@ public interface ICarrelloServices {
 
     // per svuotare tutto il carrello dopo l'ordine o su richiesta
     void svuotaCarrello(Long idUtente) throws Exception;
+    
+    void decrementaProdotto(Long idCarrelloItem) throws Exception;
 
 }

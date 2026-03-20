@@ -11,7 +11,7 @@ import com.betacom.betabooks.models.Carrello;
 @Repository
 public interface ICarrelloRepository extends JpaRepository<Carrello, Long> {
     
-    // Trova tutti gli articoli nel carrello di un utente specifico
+    // trova il carrello di un utente specifico
     Optional<Carrello> findByUtenteId(Long idUtente);
 
 
