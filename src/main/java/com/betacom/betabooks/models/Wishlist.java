@@ -14,7 +14,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter @Entity
-@Table(name = "wishlist", uniqueConstraints = {@UniqueConstraint(columnNames = {"id_utente", "id_libro"})})
+@Table(name = "wishlist", uniqueConstraints = {@UniqueConstraint(columnNames = {"id_utente", "id_formato"})})
 public class Wishlist {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,6 +26,6 @@ public class Wishlist {
     private Utente utente;
 
     @ManyToOne
-    @JoinColumn(name = "id_libro")
-    private Libro libro;
+    @JoinColumn(name = "id_formato")
+    private FormatoLibro formatoLibro;
 }

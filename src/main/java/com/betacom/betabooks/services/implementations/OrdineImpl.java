@@ -93,11 +93,11 @@ public class OrdineImpl implements IOrdineServices {
         for (CarrelloItem cItem : carrello.getItems()) {
             OrdineItem oItem = new OrdineItem();
             oItem.setOrdine(nuovoOrdine); // Colleghiamo l'item all'ordine
-            oItem.setLibro(cItem.getLibro());
+            oItem.setFormatoLibro(cItem.getFormatoLibro());
             oItem.setQuantita(cItem.getQuantita());
             
             // Fissiamo il prezzo storico (quello attuale del libro)
-            BigDecimal prezzoAlMomento = cItem.getLibro().getPrezzo();
+            BigDecimal prezzoAlMomento = cItem.getFormatoLibro().getPrezzo();
             oItem.setPrezzoUnitarioAcquisto(prezzoAlMomento);
             
             // Calcoliamo il subtotale per questa riga e lo aggiungiamo al totale ordine

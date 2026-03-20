@@ -16,7 +16,7 @@ import lombok.Setter;
 
 @Getter @Setter @Entity
 @Table(name = "carrello_items", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"id_carrello", "id_libro"})
+    @UniqueConstraint(columnNames = {"id_carrello", "id_formato"})
 })
 public class CarrelloItem {
     @Id
@@ -29,8 +29,8 @@ public class CarrelloItem {
     private Carrello carrello;
 
     @ManyToOne
-    @JoinColumn(name = "id_libro", nullable = false)
-    private Libro libro;
+    @JoinColumn(name = "id_formato", nullable = false)
+    private FormatoLibro formatoLibro;
 
     @Column(name = "quantita", nullable = false)
     @Min(value = 1)

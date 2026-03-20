@@ -11,7 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CarrelloReq { //contiene tutto ciò che serve per la creazione del carrello: dati che il frontend invia al backend
 	private Long idUtente; 
-    private Long idLibro;  
+    private Long idFormatoLibro;  
     private Integer quantita;
    
 }

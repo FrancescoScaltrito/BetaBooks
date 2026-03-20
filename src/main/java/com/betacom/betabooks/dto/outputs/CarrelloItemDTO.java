@@ -13,7 +13,7 @@ import lombok.Setter;
 @Builder
 public class CarrelloItemDTO {
     private Long id;              
-    private Long idLibro;         
+    private Long idFormatoLibro;         
     private String titoloLibro;   
     private Integer quantita;    
     private BigDecimal prezzoUnitario;

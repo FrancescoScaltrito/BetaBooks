@@ -12,13 +12,14 @@ import com.betacom.betabooks.dto.outputs.CarrelloDTO;
 import com.betacom.betabooks.dto.outputs.CarrelloItemDTO;
 import com.betacom.betabooks.models.Carrello;
 import com.betacom.betabooks.models.CarrelloItem;
-import com.betacom.betabooks.models.Libro;
+import com.betacom.betabooks.models.FormatoLibro;
 import com.betacom.betabooks.models.Utente;
 import com.betacom.betabooks.repositories.ICarrelloItemRepository;
 import com.betacom.betabooks.repositories.ICarrelloRepository;
-import com.betacom.betabooks.repositories.ILibroRepository;
+import com.betacom.betabooks.repositories.IFormatoLibroRepository;
 import com.betacom.betabooks.repositories.IUtenteRepository;
 import com.betacom.betabooks.services.interfaces.ICarrelloServices;
+import com.betacom.betabooks.utils.Mapper;
 
 import org.springframework.transaction.annotation.Transactional;
 import lombok.EqualsAndHashCode;
@@ -33,7 +34,7 @@ public class CarrelloImpl implements ICarrelloServices{
 	
 	private final ICarrelloRepository carrelloRepo;
 	private final ICarrelloItemRepository carrelloItemRepo;
-    private final ILibroRepository libroRepo;  
+    private final IFormatoLibroRepository formatoRepo;  
     private final IUtenteRepository utenteRepo;  
 
     @Override
@@ -53,7 +54,7 @@ public class CarrelloImpl implements ICarrelloServices{
         // 2. Cerco se tra gli ITEM di quel carrello esiste già il libro
         // Usiamo uno Stream per cercare nelle righe esistenti
         Optional<CarrelloItem> itemGiaPresente = carrello.getItems().stream()
-                .filter(item -> item.getLibro().getId().equals(req.getIdLibro()))
+                .filter(item -> item.getFormatoLibro().getId().equals(req.getIdFormatoLibro()))
                 .findFirst();
 
         if (itemGiaPresente.isPresent()) {
@@ -62,17 +63,17 @@ public class CarrelloImpl implements ICarrelloServices{
             item.setQuantita(item.getQuantita() + req.getQuantita());
             
             // Aggiorno il prezzo all'ultimo listino disponibile (scelta consigliata)
-            item.setPrezzoUnitario(item.getLibro().getPrezzo());
+            item.setPrezzoUnitario(item.getFormatoLibro().getPrezzo());
         } else {
             // CASO AGGIUNGI: Il libro non c'è, creo una nuova riga
-            Libro libro = libroRepo.findById(req.getIdLibro())
-                    .orElseThrow(() -> new Exception("Libro non trovato"));
+        	FormatoLibro formato = formatoRepo.findById(req.getIdFormatoLibro()) // Se nella Req hai ancora idLibro, rinominalo idealmente in idFormato
+                    .orElseThrow(() -> new Exception("Formato libro non trovato"));
 
             CarrelloItem nuovoItem = new CarrelloItem();
             nuovoItem.setCarrello(carrello);
-            nuovoItem.setLibro(libro);
+            nuovoItem.setFormatoLibro(formato);
             nuovoItem.setQuantita(req.getQuantita());
-            nuovoItem.setPrezzoUnitario(libro.getPrezzo()); // Salvo il prezzo attuale
+            nuovoItem.setPrezzoUnitario(formato.getPrezzo()); // Salvo il prezzo attuale
 
             // Aggiungo il nuovo item al Set del carrello
             carrello.getItems().add(nuovoItem);
@@ -82,7 +83,7 @@ public class CarrelloImpl implements ICarrelloServices{
     }
 
 
-
+/*
     //Dato che stai accedendo a carrello.getItems() (che di solito è caricato in modalità "Lazy", ovvero solo quando serve), è fondamentale che il metodo sia annotato con 
     @Transactional(readOnly = true)
 	@Override
@@ -102,8 +103,8 @@ public class CarrelloImpl implements ICarrelloServices{
 	                
 	                return CarrelloItemDTO.builder()
 	                        .id(item.getId())
-	                        .idLibro(item.getLibro().getId())
-	                        .titoloLibro(item.getLibro().getTitolo())
+	                        .idFormatoLibro(item.getFormatoLibro().getId())
+	                        .titoloLibro(item.getFormatoLibro().getLibro().getTitolo())
 	                        .prezzoUnitario(prezzoStorico) // Mostriamo il prezzo bloccato
 	                        .quantita(item.getQuantita())
 	                        .prezzoTotaleRiga(subTotale)
@@ -116,14 +117,24 @@ public class CarrelloImpl implements ICarrelloServices{
 	            .map(CarrelloItemDTO::getPrezzoTotaleRiga)
 	            .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-	    // 4. Restituiamo il DTO singolo (non List!)
+	
 	    return CarrelloDTO.builder()
 	            .id(carrello.getId())
 	            .idUtente(idUtente)
 	            .items(itemDTOs)
 	            .prezzoTotaleComplessivo(totaleGenerale) // <-- Assicurati che il nome nel DTO sia questo
 	            .build();
-	}
+	}*/
+    @Override
+    @Transactional(readOnly = true)
+    public CarrelloDTO findByUtente(Long idUtente) throws Exception {
+        // 1. Logica di business: recupero l'entità dal DB
+        Carrello carrello = carrelloRepo.findByUtenteId(idUtente)
+                .orElseThrow(() -> new Exception("Carrello non trovato"));
+
+        // 2. Delegazione: chiedo al Mapper di fare il lavoro sporco della conversione
+        return Mapper.buildCarrelloDTO(carrello); 
+    }
 
 	
 	@Override

@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class OrdineItemDTO {
 	private Long id;
-    private Long idLibro;
+    private Long idFormatoLibro;
     private String titoloLibro;
     private Integer quantita;
     private BigDecimal prezzoUnitarioAcquisto; 

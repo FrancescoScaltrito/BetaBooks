@@ -35,6 +35,8 @@ public class Carrello {
     @JoinColumn(name = "id_utente", nullable = false, unique = true)
     private Utente utente;
 
+
     @OneToMany(mappedBy = "carrello", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CarrelloItem> items = new HashSet<>();
+
 }

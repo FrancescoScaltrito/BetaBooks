@@ -17,7 +17,7 @@ import lombok.Setter;
 
 @Getter @Setter @Entity
 @Table(name = "ordine_items", uniqueConstraints = {
-	    @UniqueConstraint(columnNames = {"id_ordine", "id_libro"})
+	    @UniqueConstraint(columnNames = {"id_ordine", "id_id_formato"})
 	})
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class OrdineItem {
@@ -27,8 +27,8 @@ public class OrdineItem {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "id_libro", nullable = false)
-    private Libro libro;
+    @JoinColumn(name = "id_formato", nullable = false)
+    private FormatoLibro formatoLibro;
 
     @Column(name = "quantita_ordinata", nullable = false)
     private Integer quantita;
