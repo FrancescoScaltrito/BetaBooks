@@ -11,7 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class OrdineItemDTO {
-    private String titoloLibro; 
+	private Long id;
+    private Long idLibro;
+    private String titoloLibro;
     private Integer quantita;
-    private BigDecimal prezzoUnitarioAcquisto;
+    private BigDecimal prezzoUnitarioAcquisto; 
+    private BigDecimal subtotale;
 }

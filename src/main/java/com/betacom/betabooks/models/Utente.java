@@ -1,9 +1,12 @@
 package com.betacom.betabooks.models;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.betacom.betabooks.enums.RuoloUtente;
 
-
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -11,6 +14,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,4 +36,7 @@ public class Utente {
     @Enumerated(EnumType.STRING)
     @Column(name = "ruolo")
     private RuoloUtente ruolo = RuoloUtente.USER;
+    
+    @OneToOne(mappedBy = "utente", cascade = CascadeType.ALL)
+    private Carrello carrello;
 }

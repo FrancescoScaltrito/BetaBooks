@@ -1,6 +1,7 @@
 package com.betacom.betabooks.dto.outputs;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CarrelloDTO {
     private Long id;
-    private LibroDTO libro; 
-    private Integer quantita;
-    private BigDecimal prezzoPezzi; 
+    private Long idUtente;
+    private List<CarrelloItemDTO> items; 
+    private BigDecimal prezzoTotaleComplessivo;  //per inviare il calcolo al frontend
 }
