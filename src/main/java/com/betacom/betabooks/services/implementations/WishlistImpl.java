@@ -6,7 +6,6 @@ import com.betacom.betabooks.dto.inputs.CarrelloReq;
 import com.betacom.betabooks.models.Wishlist;
 import com.betacom.betabooks.repositories.IWishlistRepository;
 import com.betacom.betabooks.services.interfaces.ICarrelloServices;
-import com.betacom.betabooks.services.interfaces.IOrdineItemServices;
 import com.betacom.betabooks.services.interfaces.IWishlistServices;
 
 import jakarta.transaction.Transactional;

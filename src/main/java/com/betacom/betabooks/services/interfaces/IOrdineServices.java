@@ -6,11 +6,9 @@ import com.betacom.betabooks.dto.outputs.OrdineDTO;
 import com.betacom.betabooks.enums.MetodoPagamento;
 
 public interface IOrdineServices {
-	Long create(OrdineReq req) throws Exception;
-	void update(OrdineReq req) throws Exception;
-	void delete(Long id) throws Exception;
-	OrdineDTO findById(Long id) throws Exception;
-	List<OrdineDTO> findAll() throws Exception;
-	Long checkout(Long idUtente, Long idIndirizzo, MetodoPagamento metodo) throws Exception;
+	 public OrdineDTO creaOrdine(Long idUtente, MetodoPagamento metodo, Long idIndirizzo) throws Exception;
+
+	 List<OrdineDTO> getOrdiniUtente(Long idUtente);
+
 
 }

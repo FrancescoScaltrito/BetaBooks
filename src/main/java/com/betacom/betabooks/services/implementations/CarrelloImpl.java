@@ -40,6 +40,11 @@ public class CarrelloImpl implements ICarrelloServices{
     private final IUtenteRepository utenteRepo;  
     private final IWishlistRepository wishlistRepo;  
 
+    /*Gestione numero di copie disponibili
+     * SOFT CHECK: quando un articolo viene aggiunto al carrello, il numero di copie da aggiungere non deve essere superiore a FormatoLibro.getQuantita();. questo perchè quando un utente agiunge un libro nel carrello, quell'articolo non gli viene riservato
+     * HARD CHECK: avviene al momento del checkout (quando l'utente effettua l'ordine). Tra il momento in cui l'utente ha messo il libro nel carrello e il momento in cui clicca "Paga", un altro utente potrebbe aver comprato le ultime copie.
+     * Quindi, se la quantità è ancora disponibile, creiamo l'ordine e decrementiamo la quantità di copie disponibili in FormatoLibro.
+     */
    
     @Override
     @Transactional
@@ -59,7 +64,7 @@ public class CarrelloImpl implements ICarrelloServices{
                 .findFirst();
         
         
-        int quantitaLibriRichiesta=req.getQuantita(); //numero di libri da aggiungere al carrello..non deve essere superiore a FormatoLibro.getQuantita();
+        int quantitaLibriRichiesta=req.getQuantita(); //SOFT CHECK: numero di libri da aggiungere al carrello..non deve essere superiore a FormatoLibro.getQuantita();
         
         if (itemGiaPresente.isPresent()) {
             // Se c'è già, la nuova quantità totale sarà: attuale + richiesta
@@ -102,7 +107,7 @@ public class CarrelloImpl implements ICarrelloServices{
         carrelloRepo.save(carrello); 
     }
 
-    //da rimuovere dopo la creazione del trigger
+
     private Carrello getOrCreateCarrello(Long idUtente) {
     	
     	log.debug("Metodo getOrCreateCarrello id utente: {}", idUtente);
@@ -142,14 +147,6 @@ public class CarrelloImpl implements ICarrelloServices{
     @Override
     @Transactional
     public CarrelloDTO findByUtente(Long idUtente) {
-     /*
-    	log.debug("Metodo findByUtente: visualizzazione carrello dell'utente: {}", idUtente);
-    	
-    	return carrelloRepo.findByUtenteId(idUtente)
-                .map(Mapper::buildCarrelloDTO) // Se esiste, trasformalo
-                .orElse(new CarrelloDTO());    // Se NON esiste, dammi un DTO vuoto e pulito
-    	//se il carrello non esiste restituiamo un oggetto CarrelloDTO che ha una lista di articoli vuota. Il frontend vedrà items: [] e mostrerà "Carrello Vuoto".
-    */
     	log.debug("Metodo findByUtente: sincronizzazione e visualizzazione carrello utente: {}", idUtente);
         
         // 1. Cerchiamo il carrello
@@ -176,9 +173,6 @@ public class CarrelloImpl implements ICarrelloServices{
         
         // Se il carrello non esiste, restituiamo un DTO vuoto 
         return new CarrelloDTO();
-    
-    
-    
     
     }
 
@@ -293,21 +287,4 @@ public class CarrelloImpl implements ICarrelloServices{
 	}
 	
 	
-	/*
-	@Transactional
-	public void confermaOrdine(Long idUtente) throws Exception {
-	    Carrello carrello = carrelloRepo.findByUtenteId(idUtente).orElseThrow(...);
-	    
-	    for (CarrelloItem item : carrello.getItems()) {
-	        // QUI scali il magazzino davvero
-	        int rows = formatoRepo.decrementaSeDisponibile(item.getFormatoLibro().getId(), item.getQuantita());
-	        
-	        if (rows == 0) {
-	            throw new Exception("Spiacenti, il libro " + item.getFormatoLibro().getLibro().getTitolo() + " è terminato nel frattempo!");
-	        }
-	        
-	        // Crea riga in ordine_items, ecc...
-	    }
-	    // Svuota carrello e salva ordine
-	}*/
 }

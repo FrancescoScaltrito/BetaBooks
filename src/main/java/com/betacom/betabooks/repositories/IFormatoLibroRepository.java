@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -24,6 +25,12 @@ public interface IFormatoLibroRepository extends JpaRepository<FormatoLibro, Lon
     boolean existsByLibroIdAndTipoSupportoAndTipoCopertina(
         Long idLibro, TipoSupporto tipoSupporto, TipoCopertina tipoCopertina
     );
+    
+    @Modifying
+    @Query("UPDATE FormatoLibro f SET f.quantita = f.quantita - :q " +
+           "WHERE f.id = :id AND f.quantita >= :q")
+    int decrementaSeDisponibile(@Param("id") Long id, @Param("q") int q);
+    //Se restituisce 1, lo scalo è avvenuto. Se restituisce 0, significa che nel frattempo qualcuno ha comprato i libri e non ce n'erano a sufficienza (Hard Check fallito).
     
 
 }
