@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.betacom.betabooks.models.Carrello;
@@ -13,6 +14,6 @@ public interface ICarrelloRepository extends JpaRepository<Carrello, Long> {
     
     // trova il carrello di un utente specifico
     Optional<Carrello> findByUtenteId(Long idUtente);
-
+    
 
 }

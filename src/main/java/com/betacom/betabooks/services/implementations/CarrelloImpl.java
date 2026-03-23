@@ -14,10 +14,12 @@ import com.betacom.betabooks.models.Carrello;
 import com.betacom.betabooks.models.CarrelloItem;
 import com.betacom.betabooks.models.FormatoLibro;
 import com.betacom.betabooks.models.Utente;
+import com.betacom.betabooks.models.Wishlist;
 import com.betacom.betabooks.repositories.ICarrelloItemRepository;
 import com.betacom.betabooks.repositories.ICarrelloRepository;
 import com.betacom.betabooks.repositories.IFormatoLibroRepository;
 import com.betacom.betabooks.repositories.IUtenteRepository;
+import com.betacom.betabooks.repositories.IWishlistRepository;
 import com.betacom.betabooks.services.interfaces.ICarrelloServices;
 import com.betacom.betabooks.utils.Mapper;
 
@@ -36,7 +38,9 @@ public class CarrelloImpl implements ICarrelloServices{
 	private final ICarrelloItemRepository carrelloItemRepo;
     private final IFormatoLibroRepository formatoRepo;  
     private final IUtenteRepository utenteRepo;  
+    private final IWishlistRepository wishlistRepo;  
 
+   
     @Override
     @Transactional
     public void aggiungiOAggiornaProdotto(CarrelloReq req) throws Exception {							//idUtente, idFormatoLibro, quantità
@@ -85,7 +89,7 @@ public class CarrelloImpl implements ICarrelloServices{
         	log.debug("Aggiungo il libro nel carrello"); 
         	
             //il libro non c'è, creo un nuovo CarrelloItem
-              CarrelloItem nuovoItem = new CarrelloItem();
+            CarrelloItem nuovoItem = new CarrelloItem();
             nuovoItem.setCarrello(carrello);
             nuovoItem.setFormatoLibro(formato);
             nuovoItem.setQuantita(req.getQuantita());
@@ -98,6 +102,7 @@ public class CarrelloImpl implements ICarrelloServices{
         carrelloRepo.save(carrello); 
     }
 
+    //da rimuovere dopo la creazione del trigger
     private Carrello getOrCreateCarrello(Long idUtente) {
     	
     	log.debug("Metodo getOrCreateCarrello id utente: {}", idUtente);
@@ -118,18 +123,63 @@ public class CarrelloImpl implements ICarrelloServices{
         nuovo.setUtente(u);
         return carrelloRepo.save(nuovo);
     }
+    
 
+    //Invece di usare un Trigger (che colpirebbe migliaia di righe ogni volta che un prezzo cambia nel catalogo), quando un utente vuole visualizzare il suo carrello,
+    //il server fa un controllo rapido:
+    //Prende il prezzo salvato nel carrello.
+    //Lo confronta con quello attuale nel listino (FormatoLibro). 
+    //Se sono diversi, aggiorna il database.
+    //Invece di far fare i conti al Database o al Frontend, usiamo il Mapper come motore di calcolo.
+    //BigDecimal garantisce che ogni centesimo sia contato correttamente, fondamentale per la contabilità.
+    
+    /* Nel DTO
+     * Il calcolo avviene a cascata nel momento in cui trasformiamo le Entity in DTO:
+     * Livello Riga (CarrelloItemDTO): Il mapper moltiplica prezzoUnitario * quantita. Questo valore diventa il prezzoTotaleRiga.
+     * Livello Carrello (CarrelloDTO): Il mapper somma tutti i prezzoTotaleRiga degli articoli presenti. Questo diventa il prezzoTotaleComplessivo.
+     */
 
     @Override
-    @Transactional(readOnly = true)  //Questa è un'ottimizzazione che dice a Spring: "Guarda, in questo metodo farò solo SELECT, non scriverò nulla".
+    @Transactional
     public CarrelloDTO findByUtente(Long idUtente) {
-     
+     /*
     	log.debug("Metodo findByUtente: visualizzazione carrello dell'utente: {}", idUtente);
     	
     	return carrelloRepo.findByUtenteId(idUtente)
                 .map(Mapper::buildCarrelloDTO) // Se esiste, trasformalo
                 .orElse(new CarrelloDTO());    // Se NON esiste, dammi un DTO vuoto e pulito
     	//se il carrello non esiste restituiamo un oggetto CarrelloDTO che ha una lista di articoli vuota. Il frontend vedrà items: [] e mostrerà "Carrello Vuoto".
+    */
+    	log.debug("Metodo findByUtente: sincronizzazione e visualizzazione carrello utente: {}", idUtente);
+        
+        // 1. Cerchiamo il carrello
+        Optional<Carrello> carrelloOpt = carrelloRepo.findByUtenteId(idUtente);
+        
+        if (carrelloOpt.isPresent()) {
+            Carrello carrello = carrelloOpt.get();
+            
+            // sincronizziamo i prezzi dei libri prima della mappatura al prezzo attuale di listino
+            for (CarrelloItem item : carrello.getItems()) {
+                BigDecimal prezzoListino = item.getFormatoLibro().getPrezzo();
+                
+                // compareTo restituisce 0 se i BigDecimal sono uguali
+                if (item.getPrezzoUnitario().compareTo(prezzoListino) != 0) {
+                    log.info("Prezzo variato per l'item {}: aggiorno a {}", item.getId(), prezzoListino);
+                    item.setPrezzoUnitario(prezzoListino);
+                    // Grazie a @Transactional, Hibernate farà l'UPDATE nel DB automaticamente
+                }
+            }
+            
+            // trasformiamo nel DTO con i prezzi aggiornati
+            return Mapper.buildCarrelloDTO(carrello);
+        }
+        
+        // Se il carrello non esiste, restituiamo un DTO vuoto 
+        return new CarrelloDTO();
+    
+    
+    
+    
     }
 
 	
@@ -185,5 +235,79 @@ public class CarrelloImpl implements ICarrelloServices{
 	        carrelloItemRepo.delete(item);
 	    }
 	}
+	
+	@Override
+	@Transactional
+	public void aumentaProdotto(Long idCarrelloItem) throws Exception {
+	    log.debug("Incremento quantità per l'item carrello: {}", idCarrelloItem);
 
+	    CarrelloItem item = carrelloItemRepo.findById(idCarrelloItem)
+	            .orElseThrow(() -> new Exception("Elemento del carrello non trovato"));
+
+	    FormatoLibro formato = item.getFormatoLibro();
+
+	    // calcolo quanto diventerebbe la quantità se aumentassi di 1
+	    int nuovaQuantita = item.getQuantita() + 1;
+
+	    // controllo la disponibilità del libro
+	    if (formato.getQuantita() < nuovaQuantita) {
+	        throw new Exception("Non ci sono più copie disponibili di questo libro");
+	    }
+
+	    // aumento la quantità del libro richiesta 
+	    log.info("Aumento quantità item {}: da {} a {}", idCarrelloItem, item.getQuantita(), nuovaQuantita);
+	    item.setQuantita(nuovaQuantita);
+	    
+	    // aggiorno il prezzo all'ultimo listino
+	    item.setPrezzoUnitario(formato.getPrezzo());
+	    
+	    carrelloItemRepo.save(item);
+	}
+
+	@Override
+	@Transactional
+	public void spostaInWishlist(Long idCarrelloItem) throws Exception {
+		log.debug("Spostamento dell'item {} dal carrello alla wishlist", idCarrelloItem);
+		
+	    CarrelloItem item = carrelloItemRepo.findById(idCarrelloItem)
+	            .orElseThrow(() -> new Exception("Item non trovato"));
+
+	    Utente utente = item.getCarrello().getUtente();
+	    FormatoLibro formato = item.getFormatoLibro();
+
+	    // controllo se il libro è già in wishlist per questo utente
+	    Optional<Wishlist> giaPresente = wishlistRepo.findByUtenteAndFormatoLibro(utente, formato);
+
+	    if (giaPresente.isEmpty()) {
+	        log.info("Libro non presente in wishlist");
+	        Wishlist wishlist = new Wishlist();
+	        wishlist.setUtente(utente);
+	        wishlist.setFormatoLibro(formato);
+	        wishlistRepo.save(wishlist);
+	    } else {
+	        log.info("Libro già presente in wishlist, salto l'inserimento");
+	    }
+
+	    // tolgo l'item dal carrello
+	    carrelloItemRepo.delete(item);
+	}
+	
+	
+	/*
+	@Transactional
+	public void confermaOrdine(Long idUtente) throws Exception {
+	    Carrello carrello = carrelloRepo.findByUtenteId(idUtente).orElseThrow(...);
+	    
+	    for (CarrelloItem item : carrello.getItems()) {
+	        // QUI scali il magazzino davvero
+	        int rows = formatoRepo.decrementaSeDisponibile(item.getFormatoLibro().getId(), item.getQuantita());
+	        
+	        if (rows == 0) {
+	            throw new Exception("Spiacenti, il libro " + item.getFormatoLibro().getLibro().getTitolo() + " è terminato nel frattempo!");
+	        }
+	        
+	        // Crea riga in ordine_items, ecc...
+	    }
+	    // Svuota carrello e salva ordine
+	}*/
 }

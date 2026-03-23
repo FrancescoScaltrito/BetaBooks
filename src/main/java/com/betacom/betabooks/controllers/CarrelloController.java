@@ -109,7 +109,7 @@ public class CarrelloController {
     
     @PatchMapping("/item/{idItem}/decrementa")
     public ResponseEntity<Resp> decrementa(@PathVariable Long idItem) {
-        log.debug("CarrelloController - richiesta decremento per item: {}", idItem);
+        log.debug("CarrelloController - richiesto decremento per l'item: {}", idItem);
         
         Resp r = new Resp();
         HttpStatus status = HttpStatus.OK;
@@ -126,4 +126,36 @@ public class CarrelloController {
         return ResponseEntity.status(status).body(r);
     }
 
+    @PatchMapping("/item/{idItem}/aumenta")
+    public ResponseEntity<Resp> aumenta(@PathVariable Long idItem) {
+        log.debug("CarrelloController - richiesto aumento per l'item: {}", idItem);
+        
+        Resp r = new Resp();
+        HttpStatus status = HttpStatus.OK;
+        
+        try {
+            carrelloService.aumentaProdotto(idItem);
+            r.setMsg("Quantità aggiornata con successo");
+        } catch (Exception e) {
+            log.error("Errore durante l'aumento: {}", e.getMessage());
+            r.setMsg(e.getMessage());
+            status = HttpStatus.BAD_REQUEST;
+        }
+        
+        return ResponseEntity.status(status).body(r);
+    }
+    
+    @PostMapping("/item/{idItem}/sposta-in-wishlist")
+    public ResponseEntity<Resp> spostaInWishlist(@PathVariable Long idItem) {
+    	log.debug("CarrelloController - spostamento dal carrello alla wishlist per l'item: {}", idItem);
+        Resp r = new Resp();
+        try {
+            carrelloService.spostaInWishlist(idItem);
+            r.setMsg("Prodotto spostato nella wishlist con successo");
+            return ResponseEntity.ok(r);
+        } catch (Exception e) {
+            r.setMsg("Errore durante lo spostamento: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(r);
+        }
+    }
 }
