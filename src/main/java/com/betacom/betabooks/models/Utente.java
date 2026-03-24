@@ -19,8 +19,10 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter @Setter @Entity
-@Table(name = "utenti")
+@Getter 
+@Setter
+@Entity
+@Table(name = "utenti", schema="")
 public class Utente {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
