@@ -1,6 +1,10 @@
 package com.betacom.betabooks.dto.inputs;
 
+import java.math.BigDecimal;
 import java.util.List;
+
+import com.betacom.betabooks.enums.TipoCopertina;
+import com.betacom.betabooks.enums.TipoSupporto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,4 +22,10 @@ public class LibroReq {
     private Long idAutore;
     private Long idEditore;
     private List<Long> idCategorie;
+    
+    private TipoSupporto tipoSupporto;
+    private TipoCopertina tipoCopertina;
+    private String isbn;
+    private BigDecimal prezzo;
+    private Integer quantita;
 }

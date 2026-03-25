@@ -15,6 +15,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FormatoLibroReq {
+	
+	//La classe potrebbe anche essere eliminata, non viene più utilizzata per ora
+	
     private Long id;          
     private Long idLibro;
     private TipoSupporto tipoSupporto;
