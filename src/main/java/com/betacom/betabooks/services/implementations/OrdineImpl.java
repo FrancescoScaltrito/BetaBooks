@@ -3,6 +3,7 @@ package com.betacom.betabooks.services.implementations;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
@@ -119,6 +120,70 @@ public class OrdineImpl implements IOrdineServices {
         List<Ordine> ordini = ordineRepo.findByUtenteIdOrderByDataOrdineDesc(idUtente);
         
         return Mapper.buildOrdineDTO(ordini);
+    }
+    
+    @Override
+    @Transactional(readOnly = true) 
+    public OrdineDTO getOrdine(Long idOrdine) {
+        log.debug("Recupero dell'ordine: {}", idOrdine);
+        
+        Ordine ordine = ordineRepo.findById(idOrdine)
+                .orElseThrow(() -> new RuntimeException("Ordine con ID " + idOrdine + " non trovato"));
+        
+        return Mapper.buildOrdineDTO(ordine);
+    }
+    
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void annullaOrdine(Long idOrdine) throws Exception {
+        Ordine ordine = ordineRepo.findById(idOrdine)
+                .orElseThrow(() -> new Exception("Ordine non trovato"));
+
+        // possiamo annullare solo se non è già stato spedito
+        if (ordine.getStato() != StatoOrdine.IN_ATTESA) {
+            throw new Exception("Impossibile annullare un ordine già in lavorazione o spedito");
+        }
+
+        // restituiamo le copie al magazzino
+        for (OrdineItem item : ordine.getItems()) {
+            formatoRepo.incrementaDisponibilita(
+                item.getFormatoLibro().getId(), 
+                item.getQuantita()
+            );
+        }
+
+        // cambiamo lo stato
+        ordine.setStato(StatoOrdine.ANNULLATO);
+        ordineRepo.save(ordine);
+        
+        log.info("Ordine {} annullato", idOrdine);
+    }
+    
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void aggiornaStatoOrdine(Long idOrdine, StatoOrdine nuovoStato) {
+        log.info("Richiesta aggiornamento stato per ordine {}: nuovo stato {}", idOrdine, nuovoStato);
+
+        Ordine ordine = ordineRepo.findById(idOrdine)
+                .orElseThrow(() -> new RuntimeException("Ordine non trovato con ID: " + idOrdine));
+
+        if (ordine.getStato() == StatoOrdine.ANNULLATO) {
+            throw new RuntimeException("Impossibile modificare lo stato di un ordine già annullato.");
+        }
+
+        if (nuovoStato == StatoOrdine.ANNULLATO) {
+            try {
+                this.annullaOrdine(idOrdine); 
+                return; 
+            } catch (Exception e) {
+                throw new RuntimeException("Errore durante l'annullamento: " + e.getMessage());
+            }
+        }
+
+        ordine.setStato(nuovoStato);
+        ordineRepo.save(ordine);
+        
+        log.info("Stato ordine {} aggiornato a {}", idOrdine, nuovoStato);
     }
 }
 
