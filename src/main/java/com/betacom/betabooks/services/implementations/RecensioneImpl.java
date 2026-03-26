@@ -102,7 +102,7 @@ public class RecensioneImpl implements IRecensioneServices{
 		recensioneR.deleteById(id);
 		
 	}
-/*
+
 	@Override
 	public RecensioneDTO findById(Long id) throws Exception {
 		log.debug("RecensioneImpl - findById {}", id);
@@ -131,6 +131,6 @@ public class RecensioneImpl implements IRecensioneServices{
 		
 		List<Recensione> recensioni = recensioneR.findByLibroId(idLibro);
 		return Mapper.buildRecensioneDTO(recensioni);
-	}*/
+	}
 
 }
