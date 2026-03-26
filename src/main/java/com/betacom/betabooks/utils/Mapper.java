@@ -3,6 +3,8 @@ package com.betacom.betabooks.utils;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Component;
+
 import com.betacom.betabooks.dto.outputs.AutoreDTO;
 import com.betacom.betabooks.dto.outputs.CategoriaDTO;
 import com.betacom.betabooks.dto.outputs.EditoreDTO;
@@ -13,8 +15,18 @@ import com.betacom.betabooks.models.Categoria;
 import com.betacom.betabooks.models.Editore;
 import com.betacom.betabooks.models.FormatoLibro;
 import com.betacom.betabooks.models.Libro;
+import com.betacom.betabooks.repositories.IFormatoLibroRepository;
+import com.betacom.betabooks.repositories.ILibroRepository;
+import com.betacom.betabooks.services.interfaces.ILibroServices;
+import com.betacom.betabooks.services.interfaces.IUploadServices;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+@Component
 public class Mapper {
+	private final FormatoLibroMapper flM;
+	
 
     /*
      * AUTORE
@@ -22,6 +34,7 @@ public class Mapper {
 
     public static AutoreDTO buildAutoreDTO(Autore a) {
         return AutoreDTO.builder()
+        		.id(a.getId())
                 .biografia(a.getBiografia())
                 .nome(a.getNome())
                 .cognome(a.getCognome())
@@ -41,6 +54,7 @@ public class Mapper {
 
     public static EditoreDTO buildEditoreDTO(Editore e) {
         return EditoreDTO.builder()
+        		.id(e.getId())
                 .descrizione(e.getDescrizione())
                 .nome(e.getNome())
                 .build();
@@ -58,6 +72,7 @@ public class Mapper {
 
     public static CategoriaDTO buildCategoriaDTO(Categoria c) {
         return CategoriaDTO.builder()
+        		.id(c.getId())
                 .descrizione(c.getDescrizione())
                 .nome(c.getNome())
                 .build();
@@ -69,34 +84,13 @@ public class Mapper {
                 .collect(Collectors.toList());
     }
 
-    /*
-     * FROMATO LIBRO
-     */
-
-    public static FormatoLibroDTO buildFormatoLibroDTO(FormatoLibro f) {
-        return FormatoLibroDTO.builder()
-                .id(f.getId())
-                .tipoSupporto(f.getTipoSupporto())
-                .tipoCopertina(f.getTipoCopertina())
-                .isbn(f.getIsbn())
-                .prezzo(f.getPrezzo())
-                .quantita(f.getQuantita())
-                .attivo(f.getAttivo())
-                // copertina base64 non inclusa di default — usare findFormatoByIdCompleto
-                .build();
-    }
-
-    public static List<FormatoLibroDTO> buildFormatoLibroDTO(List<FormatoLibro> formati) {
-        return formati.stream()
-                .map(Mapper::buildFormatoLibroDTO)
-                .collect(Collectors.toList());
-    }
+    
 
     /*
      * LIBRO
      */
 
-    public static LibroDTO buildLibroDTO(Libro l) {
+    public  LibroDTO buildLibroDTO(Libro l) {
         return LibroDTO.builder()
                 .id(l.getId())
                 .titolo(l.getTitolo())
@@ -106,14 +100,18 @@ public class Mapper {
                 .categorie(buildCategoriaDTO(
                         l.getCategorie().stream().collect(Collectors.toList())))
                 .formati(l.getFormati() != null
-                        ? buildFormatoLibroDTO(l.getFormati())
+                        ? flM.buildFormatoLibroDTO(l.getFormati())
                         : List.of())
                 .build();
     }
 
-    public static List<LibroDTO> buildLibroDTO(List<Libro> libri) {
+    public  List<LibroDTO> buildLibroDTO(List<Libro> libri) {
         return libri.stream()
-                .map(Mapper::buildLibroDTO)
+                .map( l->buildLibroDTO(l))
                 .collect(Collectors.toList());
     }
+    
+
+    
+    
 }

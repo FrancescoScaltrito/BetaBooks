@@ -1,4 +1,4 @@
-package com.betacom.betabooks;
+package com.betacom.betabooks.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +12,9 @@ public class SecurityTEST {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
+            		.requestMatchers("/uploads/**").permitAll()
                 .anyRequest().permitAll()  // ← tutto aperto per ora
+                
             );
         return http.build();
     }

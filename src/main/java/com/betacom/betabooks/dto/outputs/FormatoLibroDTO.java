@@ -22,5 +22,5 @@ public class FormatoLibroDTO {
     private BigDecimal prezzo;
     private Integer quantita;
     private Boolean attivo;
-    private String copertina;  // base64 "data:mime;base64,..." solo in risposte "completo"
+    private String copertina;  
 }
