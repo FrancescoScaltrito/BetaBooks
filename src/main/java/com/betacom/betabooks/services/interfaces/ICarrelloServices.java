@@ -21,5 +21,9 @@ public interface ICarrelloServices {
     void svuotaCarrello(Long idUtente) throws Exception;
     
     void decrementaProdotto(Long idCarrelloItem) throws Exception;
+    
+    void aumentaProdotto(Long idCarrelloItem) throws Exception;
+    
+    void spostaInWishlist(Long idCarrelloItem) throws Exception;
 
 }

@@ -13,7 +13,7 @@ import com.betacom.betabooks.dto.inputs.CarrelloReq;
 import com.betacom.betabooks.dto.outputs.CarrelloDTO;
 import com.betacom.betabooks.services.interfaces.ICarrelloServices;
 import com.betacom.jpa.dto.inputs.AbbonamentoReq;
-import com.betacom.jpa.response.Resp;
+import com.betacom.betabooks.response.Resp;
 
 import org.springframework.web.bind.annotation.RequestBody;
 import lombok.RequiredArgsConstructor;
@@ -37,10 +37,10 @@ public class CarrelloController {
 		
 		try {
 			carrelloService.aggiungiOAggiornaProdotto(req);
-			r.setMsg("CarrelloController - carrello aggiornato");
+			r.setMessage("CarrelloController - carrello aggiornato");
 		} catch(Exception e) {
 			log.debug("CarrelloController - errore aggiornamento carrello");
-			r.setMsg(e.getMessage());
+			r.setMessage(e.getMessage());
 			status = HttpStatus.BAD_REQUEST;
 		}
 	
@@ -62,7 +62,7 @@ public class CarrelloController {
             log.error("CarrelloController - errore visualizzazione carrello: {}", e.getMessage());
             // Se c'è un errore, restituisco l'oggetto Resp con il messaggio
             Resp r = new Resp();
-            r.setMsg("Errore nel recupero del carrello: " + e.getMessage());
+            r.setMessage("Errore nel recupero del carrello: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(r);
         }
     }
@@ -76,10 +76,10 @@ public class CarrelloController {
 		
 		try {
 			carrelloService.rimuoviProdotto(idItem);
-			r.setMsg("CarrelloController - eliminazione item carrello riuscita");
+			r.setMessage("CarrelloController - eliminazione item carrello riuscita");
 		} catch(Exception e) {
 			log.debug("CarrelloController - eliminazione item carrello non riuscita");
-			r.setMsg(e.getMessage());
+			r.setMessage(e.getMessage());
 			status = HttpStatus.BAD_REQUEST;
 		}
 		
@@ -96,10 +96,10 @@ public class CarrelloController {
 		
 		try {
 			carrelloService.svuotaCarrello(idUtente);
-			r.setMsg("CarrelloController - svuota carrello riuscito");
+			r.setMessage("CarrelloController - svuota carrello riuscito");
 		} catch(Exception e) {
 			log.debug("CarrelloController - svuota carrello non riuscito");
-			r.setMsg(e.getMessage());
+			r.setMessage(e.getMessage());
 			status = HttpStatus.BAD_REQUEST;
 		}
 		
@@ -109,21 +109,53 @@ public class CarrelloController {
     
     @PatchMapping("/item/{idItem}/decrementa")
     public ResponseEntity<Resp> decrementa(@PathVariable Long idItem) {
-        log.debug("CarrelloController - richiesta decremento per item: {}", idItem);
+        log.debug("CarrelloController - richiesto decremento per l'item: {}", idItem);
         
         Resp r = new Resp();
         HttpStatus status = HttpStatus.OK;
         
         try {
             carrelloService.decrementaProdotto(idItem);
-            r.setMsg("Quantità aggiornata con successo");
+            r.setMessage("Quantità aggiornata con successo");
         } catch (Exception e) {
             log.error("Errore durante il decremento: {}", e.getMessage());
-            r.setMsg(e.getMessage());
+            r.setMessage(e.getMessage());
             status = HttpStatus.BAD_REQUEST;
         }
         
         return ResponseEntity.status(status).body(r);
     }
 
+    @PatchMapping("/item/{idItem}/aumenta")
+    public ResponseEntity<Resp> aumenta(@PathVariable Long idItem) {
+        log.debug("CarrelloController - richiesto aumento per l'item: {}", idItem);
+        
+        Resp r = new Resp();
+        HttpStatus status = HttpStatus.OK;
+        
+        try {
+            carrelloService.aumentaProdotto(idItem);
+            r.setMessage("Quantità aggiornata con successo");
+        } catch (Exception e) {
+            log.error("Errore durante l'aumento: {}", e.getMessage());
+            r.setMessage(e.getMessage());
+            status = HttpStatus.BAD_REQUEST;
+        }
+        
+        return ResponseEntity.status(status).body(r);
+    }
+    
+    @PostMapping("/item/{idItem}/sposta-in-wishlist")
+    public ResponseEntity<Resp> spostaInWishlist(@PathVariable Long idItem) {
+    	log.debug("CarrelloController - spostamento dal carrello alla wishlist per l'item: {}", idItem);
+        Resp r = new Resp();
+        try {
+            carrelloService.spostaInWishlist(idItem);
+            r.setMessage("Prodotto spostato nella wishlist con successo");
+            return ResponseEntity.ok(r);
+        } catch (Exception e) {
+            r.setMessage("Errore durante lo spostamento: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(r);
+        }
+    }
 }
