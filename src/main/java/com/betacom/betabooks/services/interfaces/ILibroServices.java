@@ -11,14 +11,12 @@ import com.betacom.betabooks.dto.outputs.LibroDTO;
 
 public interface ILibroServices {
 
-    Long create(LibroReq req) throws Exception;
+	Long create(LibroReq req) throws Exception;
     void update(LibroReq req) throws Exception;
     void delete(Long id) throws Exception;
     LibroDTO findById(Long id) throws Exception;
     List<LibroDTO> findAll() throws Exception;
 
-   
-    Long createFormato(FormatoLibroReq req) throws Exception;
     void updateFormato(FormatoLibroReq req) throws Exception;
     void disattivaFormato(Long idFormato) throws Exception;
     List<FormatoLibroDTO> findFormatiByLibro(Long idLibro) throws Exception;
@@ -26,4 +24,13 @@ public interface ILibroServices {
 
     void salvaCopertina(Long idFormato, MultipartFile file) throws Exception;
     FormatoLibroDTO findFormatoByIdCompleto(Long idFormato) throws Exception;
+    
+    Long createFormatoLibro(Long idLibro, LibroReq req) throws Exception;
+    
+    
+    
+//    Long creaCartaceo(LibroReq req) throws Exception;
+//    Long creaEbook(LibroReq req) throws Exception;
+    
+    
 }

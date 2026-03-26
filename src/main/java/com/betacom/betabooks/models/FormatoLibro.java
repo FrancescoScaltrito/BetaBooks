@@ -50,11 +50,8 @@ public class FormatoLibro {
     @Column(name = "quantita_magazzino")
     private Integer quantita;  // NULL per ebook
 
-    @Column(name = "copertina", columnDefinition = "BYTEA")
-    private byte[] copertina;
-
-    @Column(name = "copertina_mime_type", length = 50)
-    private String copertinaMimeType;
+    @Column(name = "copertina")
+    private String copertina;
 
     @Column(name = "attivo")
     private Boolean attivo = true;
@@ -63,8 +60,4 @@ public class FormatoLibro {
     @JoinColumn(name = "id_libro", nullable = false)
     private Libro libro;
 
-    // Getter array di byte (Lombok non so perchè non lo genera )
-    public byte[] getCopertina() {
-        return this.copertina;
-    }
 }
