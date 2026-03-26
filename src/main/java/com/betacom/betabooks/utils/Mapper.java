@@ -13,6 +13,7 @@ import com.betacom.betabooks.dto.outputs.FormatoLibroDTO;
 import com.betacom.betabooks.dto.outputs.LibroDTO;
 import com.betacom.betabooks.dto.outputs.OrdineDTO;
 import com.betacom.betabooks.dto.outputs.OrdineItemDTO;
+import com.betacom.betabooks.dto.outputs.RecensioneDTO;
 import com.betacom.betabooks.models.Autore;
 import com.betacom.betabooks.models.Carrello;
 import com.betacom.betabooks.models.CarrelloItem;
@@ -22,6 +23,7 @@ import com.betacom.betabooks.models.FormatoLibro;
 import com.betacom.betabooks.models.Libro;
 import com.betacom.betabooks.models.Ordine;
 import com.betacom.betabooks.models.OrdineItem;
+import com.betacom.betabooks.models.Recensione;
 
 public class Mapper {
 
@@ -31,7 +33,6 @@ public class Mapper {
 
     public static AutoreDTO buildAutoreDTO(Autore a) {
         return AutoreDTO.builder()
-        		.id(a.getId())
                 .biografia(a.getBiografia())
                 .nome(a.getNome())
                 .cognome(a.getCognome())
@@ -51,7 +52,6 @@ public class Mapper {
 
     public static EditoreDTO buildEditoreDTO(Editore e) {
         return EditoreDTO.builder()
-        		.id(e.getId())
                 .descrizione(e.getDescrizione())
                 .nome(e.getNome())
                 .build();
@@ -69,7 +69,6 @@ public class Mapper {
 
     public static CategoriaDTO buildCategoriaDTO(Categoria c) {
         return CategoriaDTO.builder()
-        		.id(c.getId())
                 .descrizione(c.getDescrizione())
                 .nome(c.getNome())
                 .build();
@@ -216,4 +215,34 @@ public class Mapper {
                 .map(Mapper::buildOrdineDTO)
                 .collect(Collectors.toList());
     }
+    
+    /*
+     * RECENSIONI
+     */
+    public static RecensioneDTO buildRecensioneDTO(Recensione r) {
+    	//Formatta il nome dell'utente se è presente
+    	String nomeUtente = "Utente sconosciuto";
+    	if (r.getProfiloUtente() != null) {
+    		String nome = r.getProfiloUtente().getNome() != null ? r.getProfiloUtente().getNome() : "";
+    		String cognome = (r.getProfiloUtente().getCognome() != null) ? r.getProfiloUtente().getCognome().substring(0, 1).toUpperCase() + "." : "";
+    		nomeUtente = (nome + " " + cognome).trim();
+    	}
+    	
+    	return RecensioneDTO.builder()
+    			.id(r.getId())
+    			.nomeUtente(nomeUtente)
+    			.titoloLibro(r.getLibro() != null ? r.getLibro().getTitolo() : null)
+    			.valutazione(r.getValutazione())
+    			.descrizione(r.getDescrizione())
+    			.data(r.getData())
+    			.build();
+    }
+    
+    public static List<RecensioneDTO> buildRecensioneDTO(List<Recensione> recensioni) {
+        return recensioni.stream()
+                .map(Mapper::buildRecensioneDTO)
+                .collect(Collectors.toList());
+    }
+    
 }
+

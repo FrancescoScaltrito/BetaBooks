@@ -19,5 +19,5 @@ public interface IRecensioneServices {
 
     List<RecensioneDTO> findByLibro(Long idLibro) throws Exception;
 
-    List<RecensioneDTO> findByUtente(Long idUtente) throws Exception;
+
 }
