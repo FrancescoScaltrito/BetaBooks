@@ -270,7 +270,7 @@ public class CarrelloImpl implements ICarrelloServices{
 	    FormatoLibro formato = item.getFormatoLibro();
 
 	    // controllo se il libro è già in wishlist per questo utente
-	    Optional<Wishlist> giaPresente = wishlistRepo.findByUtenteAndFormatoLibro(utente, formato);
+	    Optional<Wishlist> giaPresente = wishlistRepo.findByUtenteIdAndFormatoLibro_Id(utente.getId(), formato.getId());
 
 	    if (giaPresente.isEmpty()) {
 	        log.info("Libro non presente in wishlist");
