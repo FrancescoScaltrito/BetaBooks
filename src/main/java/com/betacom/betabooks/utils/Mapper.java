@@ -31,6 +31,7 @@ public class Mapper {
 
     public static AutoreDTO buildAutoreDTO(Autore a) {
         return AutoreDTO.builder()
+        		.id(a.getId())
                 .biografia(a.getBiografia())
                 .nome(a.getNome())
                 .cognome(a.getCognome())
@@ -50,6 +51,7 @@ public class Mapper {
 
     public static EditoreDTO buildEditoreDTO(Editore e) {
         return EditoreDTO.builder()
+        		.id(e.getId())
                 .descrizione(e.getDescrizione())
                 .nome(e.getNome())
                 .build();
@@ -67,6 +69,7 @@ public class Mapper {
 
     public static CategoriaDTO buildCategoriaDTO(Categoria c) {
         return CategoriaDTO.builder()
+        		.id(c.getId())
                 .descrizione(c.getDescrizione())
                 .nome(c.getNome())
                 .build();

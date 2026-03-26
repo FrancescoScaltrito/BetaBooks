@@ -77,17 +77,29 @@ public class OrdineImpl implements IOrdineServices {
         for (CarrelloItemDTO itemDto : carrelloDto.getItems()) {
         	
         	log.debug("Creazione di un ordineItem");
+        	
+        	FormatoLibro formato = formatoRepo.findById(itemDto.getIdFormatoLibro())
+                    .orElseThrow(() -> new RuntimeException("Libro non trovato"));
             
-            // controlliamo se ci sono abbastanza copie in magazzino
-        	//se disponibilità=1 ci sono abbastanza copie e il db decrementa il numero di copie disponibili per il libro
-            int disponibilità = formatoRepo.decrementaSeDisponibile(itemDto.getIdFormatoLibro(), itemDto.getQuantita());
-            
-            //grazie a @Transactional il decremento diventa definitivo e visibile a tutti gli altri utenti solo quando il metodo creaOrdine arriva all'ultima riga e termina senza errori.
-            
-            if (disponibilità == 0) {
-                // non ci sono abbastanza copie
-                throw new Exception("Spiacenti, la disponibilità per '" + itemDto.getTitoloLibro() + "' è terminata.");
-            }
+        	
+        	if (Boolean.FALSE.equals(formato.getAttivo())) {
+        	    throw new Exception("Spiacenti, l'articolo '" + itemDto.getTitoloLibro() + "' non è più disponibile per la vendita.");
+        	}
+        	
+        	if (formato.getQuantita() != null) {
+        	    // è un libro fisico: eseguiamo l'Hard Check e il decremento 
+        		 // controlliamo se ci sono abbastanza copie in magazzino
+            	//se disponibilità=1 ci sono abbastanza copie e il db decrementa il numero di copie disponibili per il libro
+        	    int disponibilita = formatoRepo.decrementaSeDisponibile(itemDto.getIdFormatoLibro(), itemDto.getQuantita());
+        	    
+        	    if (disponibilita == 0) {
+        	        throw new Exception("Spiacenti, la disponibilità per '" + itemDto.getTitoloLibro() + "' non è sufficiente.");
+        	    }
+        	} else {
+        	    // è un ebook
+        	    log.info("Ebook: salto il decremento magazzino per {}", itemDto.getTitoloLibro());
+        	}
+        	
 
             
             OrdineItem ordineItem = new OrdineItem();
@@ -95,8 +107,7 @@ public class OrdineImpl implements IOrdineServices {
             ordineItem.setQuantita(itemDto.getQuantita());
             ordineItem.setPrezzoUnitarioAcquisto(itemDto.getPrezzoUnitario());
             
-            FormatoLibro formato = formatoRepo.findById(itemDto.getIdFormatoLibro())
-                    .orElseThrow(() -> new RuntimeException("Libro non trovato"));
+ 
             ordineItem.setFormatoLibro(formato); 
             ordine.getItems().add(ordineItem);
         }
@@ -144,12 +155,15 @@ public class OrdineImpl implements IOrdineServices {
             throw new Exception("Impossibile annullare un ordine già in lavorazione o spedito");
         }
 
-        // restituiamo le copie al magazzino
+        // restituiamo le copie al magazzino se è un libro cartaceo
         for (OrdineItem item : ordine.getItems()) {
-            formatoRepo.incrementaDisponibilita(
-                item.getFormatoLibro().getId(), 
-                item.getQuantita()
-            );
+        	if (item.getFormatoLibro().getQuantita() != null) {
+                formatoRepo.incrementaDisponibilita(
+                    item.getFormatoLibro().getId(), 
+                    item.getQuantita()
+                );
+                log.debug("Restituite {} copie al magazzino per formato {}", item.getQuantita(), item.getFormatoLibro().getId());
+            }
         }
 
         // cambiamo lo stato
