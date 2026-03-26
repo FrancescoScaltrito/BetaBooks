@@ -1,3 +1,3 @@
 package com.betacom.betabooks.enums;
 
-public enum StatoOrdine { IN_ATTESA, SPEDITO, CONSEGNATO }
+public enum StatoOrdine { IN_ATTESA, SPEDITO, CONSEGNATO, ANNULLATO }
