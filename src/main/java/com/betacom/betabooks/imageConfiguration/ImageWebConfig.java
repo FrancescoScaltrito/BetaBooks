@@ -1,4 +1,4 @@
-package com.betacom.betabooks.configuration;
+package com.betacom.betabooks.imageConfiguration;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -9,7 +9,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-public class WebConfig implements WebMvcConfigurer{
+public class ImageWebConfig implements WebMvcConfigurer{
 
 	@Value("${app.upload.dir:uploads}")
     private String uploadDir;
