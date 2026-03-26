@@ -1,5 +1,6 @@
 package com.betacom.betabooks.services.interfaces;
 
+
 import java.util.List;
 import com.betacom.betabooks.models.Wishlist;
 
@@ -15,4 +16,3 @@ public interface IWishlistServices {
 
     void clearWishlist(Long userId) throws Exception;
 }
-
