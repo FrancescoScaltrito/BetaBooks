@@ -64,117 +64,74 @@ public class CarrelloImpl implements ICarrelloServices{
                 .filter(item -> item.getFormatoLibro().getId().equals(req.getIdFormatoLibro()))
                 .findFirst();
         
-        //gestione degli ebook
         if (formato.getQuantita() == null) {
-        	if (req.getQuantita()>1) {
-        		 throw new Exception("Non puoi acquistare più di una copia digitale dello stesso libro");
-        	}
-            if (itemGiaPresente.isPresent()) {
-                log.info("Ebook già presente nel carrello, non incremento");
-                return; 
-            }
-            req.setQuantita(1); 
+        	aggiuntaEbook(itemGiaPresente, carrello, formato, req);
         }
-
-        // check disponibilità (solo per i fisici)
-        int quantitaLibriRichiesta = req.getQuantita();
-        if (itemGiaPresente.isPresent()) {
-            quantitaLibriRichiesta += itemGiaPresente.get().getQuantita();
+        else {
+        	aggiuntaCartaceo(itemGiaPresente, carrello, formato, req);
         }
-        
-        // Controllo disponibilità magazzino (solo per fisici, perché null != null è gestito sopra)
-        if (formato.getQuantita() != null) {
-            if (formato.getQuantita() < quantitaLibriRichiesta) {
-                throw new Exception("Quantità non disponibile. Disponibili solo: " + formato.getQuantita() + "pezzi");
-            }
-        }
-
-        // Aggiunta o Aggiornamento reale
-        if (itemGiaPresente.isPresent()) {
-            log.debug("Aumento quantità nel carrello");   
-            CarrelloItem item = itemGiaPresente.get();
-            //gli ebook non arriveranno mai qui grazie al return sopra
-            item.setQuantita(item.getQuantita() + req.getQuantita());
-            item.setPrezzoUnitario(formato.getPrezzo());
-        } else {
-            log.debug("Nuovo inserimento nel carrello"); 
-            CarrelloItem nuovoItem = new CarrelloItem();
-            nuovoItem.setCarrello(carrello);
-            nuovoItem.setFormatoLibro(formato);
-            nuovoItem.setQuantita(req.getQuantita());
-            nuovoItem.setPrezzoUnitario(formato.getPrezzo()); 
-
-            carrello.getItems().add(nuovoItem);
-        }
-        
-        carrelloRepo.save(carrello); 
     }
     
+   private void aggiuntaEbook(Optional<CarrelloItem> itemGiaPresente,Carrello carrello, FormatoLibro formato, CarrelloReq req) throws Exception {
+	   	if (req.getQuantita()>1) {
+			 throw new Exception("Non puoi acquistare più di una copia digitale dello stesso libro");
+		}
+	   if (itemGiaPresente.isPresent()) {
+	       log.info("Ebook già presente nel carrello, non incremento");
+	       return; 
+	   }
+	   req.setQuantita(1); 
+	   
+       log.debug("Nuovo inserimento nel carrello"); 
+       CarrelloItem nuovoItem = new CarrelloItem();
+       nuovoItem.setCarrello(carrello);
+       nuovoItem.setFormatoLibro(formato);
+       nuovoItem.setQuantita(req.getQuantita());
+       nuovoItem.setPrezzoUnitario(formato.getPrezzo()); 
+
+       carrello.getItems().add(nuovoItem);
+       
+       carrelloRepo.save(carrello);
+	   
+   }
+   
+   private void aggiuntaCartaceo(Optional<CarrelloItem> itemGiaPresente, Carrello carrello, FormatoLibro formato, CarrelloReq req) throws Exception {
+       // check disponibilità (solo per i fisici)
+       int quantitaLibriRichiesta = req.getQuantita();
+       if (itemGiaPresente.isPresent()) {
+           quantitaLibriRichiesta += itemGiaPresente.get().getQuantita();
+       }
+       
+       // Controllo disponibilità magazzino (solo per fisici, perché null != null è gestito sopra)
+       if (formato.getQuantita() != null) {
+           if (formato.getQuantita() < quantitaLibriRichiesta) {
+               throw new Exception("Quantità non disponibile. Disponibili solo: " + formato.getQuantita() + "pezzi");
+           }
+       }
+       
+       // Aggiunta o Aggiornamento reale
+       if (itemGiaPresente.isPresent()) {
+           log.debug("Aumento quantità nel carrello");   
+           CarrelloItem item = itemGiaPresente.get();
+           //gli ebook non arriveranno mai qui grazie al return sopra
+           item.setQuantita(item.getQuantita() + req.getQuantita());
+           item.setPrezzoUnitario(formato.getPrezzo());
+       } else {
+           log.debug("Nuovo inserimento nel carrello"); 
+           CarrelloItem nuovoItem = new CarrelloItem();
+           nuovoItem.setCarrello(carrello);
+           nuovoItem.setFormatoLibro(formato);
+           nuovoItem.setQuantita(req.getQuantita());
+           nuovoItem.setPrezzoUnitario(formato.getPrezzo()); 
+
+           carrello.getItems().add(nuovoItem);
+       }
+       
+       carrelloRepo.save(carrello);
+   }
     
-    /* gestione solo libri fisici
-    @Override
-    @Transactional
-    public void aggiungiOAggiornaProdotto(CarrelloReq req) throws Exception {							//idUtente, idFormatoLibro, quantità
-    	log.debug("Aggiornamento carrello {}", req);   
-    	
-        // recupero il formato del libro per controllare la disponibilità
-        FormatoLibro formato = formatoRepo.findById(req.getIdFormatoLibro())
-                .orElseThrow(() -> new Exception("Formato libro non trovato"));
-        
-        if (Boolean.FALSE.equals(formato.getAttivo())) {
-            throw new Exception("Spiacenti, questo formato non è più disponibile nel nostro catalogo.");
-        }
-        
-    	// cerco il carrello associato all'utente
-    	Carrello carrello=getOrCreateCarrello(req.getIdUtente());										//id, Utente, lista items
+    
 
-    	// cerco se tra gli item di quel carrello esiste già il libro
-        Optional<CarrelloItem> itemGiaPresente = carrello.getItems().stream()							//id, Carrello, Formatolibro, quantita, prezzounit
-                .filter(item -> item.getFormatoLibro().getId().equals(req.getIdFormatoLibro()))
-                .findFirst();
-        
-        
-        int quantitaLibriRichiesta=req.getQuantita(); //SOFT CHECK: numero di libri da aggiungere al carrello..non deve essere superiore a FormatoLibro.getQuantita();
-        
-        if (itemGiaPresente.isPresent()) {
-            // Se c'è già, la nuova quantità totale sarà: attuale + richiesta
-        	quantitaLibriRichiesta += itemGiaPresente.get().getQuantita();
-        }
-        
-    	if (formato.getQuantita() < quantitaLibriRichiesta) {
-            throw new Exception("Quantità non disponibile. Disponibili solo: " + formato.getQuantita()+" libri");
-        }
-        
-        if (itemGiaPresente.isPresent()) {
-        	log.debug("Aumento la quantità del libro nel carrello");   
-        	
-        	// il libro c'è già nel carrello: ne aggiorno la quantità in CarrelloItem
-            CarrelloItem item = itemGiaPresente.get();
-            item.setQuantita(item.getQuantita() + req.getQuantita());
-            // aggiorno il prezzo all'ultimo listino disponibile
-            item.setPrezzoUnitario(item.getFormatoLibro().getPrezzo());
-            
-            //Quando tu fai item.setQuantita(...), Hibernate segna quell'oggetto come "sporco" (modificato).
-            //Alla fine del metodo, quando la transazione si chiude, Hibernate invia automaticamente l' UPDATE al database per te, anche se non scrivi .save().
-            //tutto questo grazie all'annotazione @Transactional
-            
-        } else {
-        	
-        	log.debug("Aggiungo il libro nel carrello"); 
-        	
-            //il libro non c'è, creo un nuovo CarrelloItem
-            CarrelloItem nuovoItem = new CarrelloItem();
-            nuovoItem.setCarrello(carrello);
-            nuovoItem.setFormatoLibro(formato);
-            nuovoItem.setQuantita(req.getQuantita());
-            nuovoItem.setPrezzoUnitario(formato.getPrezzo()); 
-
-            // aggiungo il nuovo item al Set del carrello
-            carrello.getItems().add(nuovoItem);
-        }
-        
-        carrelloRepo.save(carrello); 
-    }*/
 
 
     private Carrello getOrCreateCarrello(Long idUtente) {
