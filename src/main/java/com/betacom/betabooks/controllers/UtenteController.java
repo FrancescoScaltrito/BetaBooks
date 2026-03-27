@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.betacom.betabooks.dto.inputs.UtenteReq;
 import com.betacom.betabooks.dto.outputs.UtenteDTO;
+import com.betacom.betabooks.enums.RuoloUtente;
 import com.betacom.betabooks.models.Utente;
 import com.betacom.betabooks.repositories.IUtenteRepository;
 
@@ -44,6 +45,7 @@ public class UtenteController {
         Utente utente = new Utente();
         utente.setEmail(req.getEmail());
         utente.setPassword(passwordEncoder.encode(req.getPassword()));
+        utente.setRuolo(RuoloUtente.valueOf(req.getRuolo()));
 
         Utente salvato = utenteRepository.save(utente);
 

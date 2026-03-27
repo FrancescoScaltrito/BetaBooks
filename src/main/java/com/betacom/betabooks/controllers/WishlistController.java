@@ -4,72 +4,102 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+import com.betacom.betabooks.dto.outputs.WishlistDTO;
 import com.betacom.betabooks.services.interfaces.IWishlistServices;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/wishlist")
 public class WishlistController {
 
     private final IWishlistServices wishlistService;
 
-    public WishlistController(IWishlistServices wishlistService) {
-        this.wishlistService = wishlistService;
-    }
-
-    // Aggiungi un elemento alla wishlist
-    @PostMapping("/add")
-    public ResponseEntity<String> add(@RequestParam Long userId, @RequestParam Long formatId) {
+    // Aggiungi libro alla wishlist
+    @PostMapping("/aggiungi")
+    public ResponseEntity<Void> addToWishlist(
+            @RequestParam Long userId,
+            @RequestParam Long formatId) {
         try {
             wishlistService.addToWishlist(userId, formatId);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Elemento aggiunto alla wishlist");
+            return ResponseEntity.status(HttpStatus.CREATED).build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            log.error("Errore addToWishlist: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 
-    // Rimuovi un elemento dalla wishlist
-    @DeleteMapping("/remove")
-    public ResponseEntity<String> remove(@RequestParam Long userId, @RequestParam Long formatId) {
+    // Rimuovi libro dalla wishlist
+    @DeleteMapping("/rimuovi")
+    public ResponseEntity<Void> removeFromWishlist(
+            @RequestParam Long userId,
+            @RequestParam Long formatId) {
         try {
             wishlistService.removeFromWishlist(userId, formatId);
-            return ResponseEntity.ok("Elemento rimosso dalla wishlist");
+            return ResponseEntity.noContent().build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            log.error("Errore removeFromWishlist: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 
-    // Controlla se un elemento è presente nella wishlist
-    @GetMapping("/check")
-    public ResponseEntity<Boolean> isInWishlist(@RequestParam Long userId, @RequestParam Long formatId) {
+    // Controlla se un libro è in wishlist
+    @GetMapping("/controlla")
+    public ResponseEntity<Boolean> isInWishlist(
+            @RequestParam Long userId,
+            @RequestParam Long formatId) {
         try {
-            boolean exists = wishlistService.isInWishlist(userId, formatId);
-            return ResponseEntity.ok(exists);
+            boolean result = wishlistService.isInWishlist(userId, formatId);
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(false);
+            log.error("Errore isInWishlist: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 
-    // Recupera tutti gli ID dei formati nella wishlist di un utente
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Long>> getUserWishlist(@PathVariable Long userId) {
+    // Recupera tutti i libri in wishlist di un utente
+    @GetMapping("/utente/{userId}")
+    public ResponseEntity<List<WishlistDTO>> getWishlistByUser(@PathVariable Long userId) {
         try {
-            List<Long> wishlist = wishlistService.getWishlistByUser(userId);
-            return ResponseEntity.ok(wishlist);
+            return ResponseEntity.ok(wishlistService.getWishlistByUser(userId));
         } catch (Exception e) {
+            log.error("Errore getWishlistByUser: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
     // Svuota tutta la wishlist di un utente
-    @DeleteMapping("/user/{userId}/clear")
-    public ResponseEntity<String> clearWishlist(@PathVariable Long userId) {
+    @DeleteMapping("/pulisci/{userId}")
+    public ResponseEntity<Void> clearWishlist(@PathVariable Long userId) {
         try {
             wishlistService.clearWishlist(userId);
-            return ResponseEntity.ok("Wishlist svuotata");
+            return ResponseEntity.noContent().build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            log.error("Errore clearWishlist: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    // Sposta un elemento dalla wishlist al carrello
+    @PostMapping("/{idWishlist}/sposta-carrello")
+    public ResponseEntity<Void> spostaNelCarrello(@PathVariable Long idWishlist) {
+        try {
+            wishlistService.spostaNelCarrello(idWishlist);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            log.error("Errore spostaNelCarrello: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 }
