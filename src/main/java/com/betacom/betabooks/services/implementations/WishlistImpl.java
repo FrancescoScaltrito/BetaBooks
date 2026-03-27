@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.betabooks.dto.inputs.CarrelloReq;
+import com.betacom.betabooks.dto.outputs.WishlistDTO;
+import com.betacom.betabooks.dto.outputs.LibroDTO;
 import com.betacom.betabooks.models.FormatoLibro;
 import com.betacom.betabooks.models.Utente;
 import com.betacom.betabooks.models.Wishlist;
@@ -72,12 +74,12 @@ public class WishlistImpl implements IWishlistServices {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Long> getWishlistByUser(Long userId) throws Exception {
+    public List<WishlistDTO> getWishlistByUser(Long userId) throws Exception {
         if (userId == null) throw new Exception("Id utente non può essere null");
 
         List<Wishlist> wishlist = wishlistR.findByUtenteId(userId);
         return wishlist.stream()
-                       .map(w -> w.getFormatoLibro().getId())
+                       .map(this::toDTO)
                        .collect(Collectors.toList());
     }
 
@@ -91,6 +93,7 @@ public class WishlistImpl implements IWishlistServices {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    @Override
     public void spostaNelCarrello(Long idWishlist) throws Exception {
         log.debug("WishlistImpl - spostaNelCarrello idWishlist: {}", idWishlist);
 
@@ -104,5 +107,21 @@ public class WishlistImpl implements IWishlistServices {
 
         carrelloService.aggiungiOAggiornaProdotto(req);
         wishlistR.delete(wish);
+    }
+
+    
+    private WishlistDTO toDTO(Wishlist w) {
+        FormatoLibro formato = w.getFormatoLibro();
+
+        LibroDTO libroDTO = LibroDTO.builder()
+                .id(formato.getLibro().getId())
+                .titolo(formato.getLibro().getTitolo())
+                .descrizione(formato.getLibro().getDescrizione())
+                .build();
+
+        return WishlistDTO.builder()
+                .id(w.getId())
+                .libro(libroDTO)
+                .build();
     }
 }
