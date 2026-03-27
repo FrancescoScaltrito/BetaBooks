@@ -74,8 +74,8 @@ public class CarrelloImpl implements ICarrelloServices {
 			 throw new Exception("Non puoi acquistare più di una copia digitale dello stesso libro");
 		}
 	   if (itemGiaPresente.isPresent()) {
-	       log.info("Ebook già presente nel carrello, non incremento");
-	       return; 
+		   throw new Exception("Ebook già presente nel carrello, non incremento");
+	    
 	   }
 	   req.setQuantita(1); 
 	   
@@ -102,7 +102,7 @@ public class CarrelloImpl implements ICarrelloServices {
        // Controllo disponibilità magazzino (solo per fisici, perché null != null è gestito sopra)
        if (formato.getQuantita() != null) {
            if (formato.getQuantita() < quantitaLibriRichiesta) {
-               throw new Exception("Quantità non disponibile. Disponibili solo: " + formato.getQuantita() + "pezzi");
+               throw new Exception("Quantità non disponibile. Disponibili solo: " + formato.getQuantita() + " pezzi");
            }
        }
        
@@ -210,7 +210,7 @@ public class CarrelloImpl implements ICarrelloServices {
             item.setPrezzoUnitario(item.getFormatoLibro().getPrezzo());
             carrelloItemRepo.save(item);
         } else {
-            log.debug("Quantità pari a 1, procedo con la rimozione dell'item");
+            log.debug("Quantità pari a 1, procedo con la rimozione dell'item dal carrello");
             carrelloItemRepo.delete(item);
         }
     }
@@ -224,6 +224,13 @@ public class CarrelloImpl implements ICarrelloServices {
                 .orElseThrow(() -> new Exception("Elemento del carrello non trovato"));
 
         FormatoLibro formato = item.getFormatoLibro();
+        
+        //si tratta di un ebook
+        if (formato.getQuantita() == null) {
+        	throw new Exception("Non puoi acquistare più di una copia digitale dello stesso libro");
+        }
+        
+        //si tratta di un libro cartaceo
         int nuovaQuantita = item.getQuantita() + 1;
 
         if (formato.getQuantita() < nuovaQuantita) {
