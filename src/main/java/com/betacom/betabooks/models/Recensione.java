@@ -15,7 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter @Entity
-@Table(name = "recensioni", uniqueConstraints = {@UniqueConstraint(columnNames = {"id_utente", "id_libro"})})
+@Table(name = "recensioni", uniqueConstraints = {@UniqueConstraint(columnNames = {"id_profilo", "id_libro"})})
 public class Recensione {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,8 +23,8 @@ public class Recensione {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "id_utente")
-    private Utente utente;
+    @JoinColumn(name = "id_profilo")
+    private ProfiloUtente profiloUtente;
 
     @ManyToOne
     @JoinColumn(name = "id_libro")

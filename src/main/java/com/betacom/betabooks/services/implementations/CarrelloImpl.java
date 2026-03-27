@@ -40,44 +40,95 @@ public class CarrelloImpl implements ICarrelloServices {
     @Override
     @Transactional
     public void aggiungiOAggiornaProdotto(CarrelloReq req) throws Exception {
-        log.debug("Aggiornamento carrello {}", req);
 
-        FormatoLibro formato = formatoRepo.findById(req.getIdFormatoLibro())
-                .orElseThrow(() -> new Exception("Formato libro non trovato"));
+	    log.debug("Aggiornamento carrello {}", req);
+	    FormatoLibro formato = formatoRepo.findById(req.getIdFormatoLibro())
+	    .orElseThrow(() -> new Exception("Formato libro non trovato"));
+	
+	    if (Boolean.FALSE.equals(formato.getAttivo())) {
+	    	throw new Exception("Spiacenti, questo formato non è più disponibile.");
+	
+	    }
+	
+	    Carrello carrello = getOrCreateCarrello(req.getIdUtente());
+	
+	    Optional<CarrelloItem> itemGiaPresente = carrello.getItems().stream()
+		    .filter(item -> item.getFormatoLibro().getId().equals(req.getIdFormatoLibro()))
+		    .findFirst();
+	
+	    if (formato.getQuantita() == null) {
+	    	aggiuntaEbook(itemGiaPresente, carrello, formato, req);
+	    }
+	
+	    else {
+	    	aggiuntaCartaceo(itemGiaPresente, carrello, formato, req);
+	    }
 
-        Carrello carrello = getOrCreateCarrello(req.getIdUtente());
-
-        Optional<CarrelloItem> itemGiaPresente = carrello.getItems().stream()
-                .filter(item -> item.getFormatoLibro().getId().equals(req.getIdFormatoLibro()))
-                .findFirst();
-
-        int quantitaLibriRichiesta = req.getQuantita();
-
-        if (itemGiaPresente.isPresent()) {
-            quantitaLibriRichiesta += itemGiaPresente.get().getQuantita();
-        }
-
-        if (formato.getQuantita() < quantitaLibriRichiesta) {
-            throw new Exception("Quantità non disponibile. Disponibili solo: " + formato.getQuantita() + " libri");
-        }
-
-        if (itemGiaPresente.isPresent()) {
-            log.debug("Aumento la quantità del libro nel carrello");
-            CarrelloItem item = itemGiaPresente.get();
-            item.setQuantita(item.getQuantita() + req.getQuantita());
-            item.setPrezzoUnitario(item.getFormatoLibro().getPrezzo());
-        } else {
-            log.debug("Aggiungo il libro nel carrello");
-            CarrelloItem nuovoItem = new CarrelloItem();
-            nuovoItem.setCarrello(carrello);
-            nuovoItem.setFormatoLibro(formato);
-            nuovoItem.setQuantita(req.getQuantita());
-            nuovoItem.setPrezzoUnitario(formato.getPrezzo());
-            carrello.getItems().add(nuovoItem);
-        }
-
-        carrelloRepo.save(carrello);
     }
+
+
+  
+    
+   private void aggiuntaEbook(Optional<CarrelloItem> itemGiaPresente,Carrello carrello, FormatoLibro formato, CarrelloReq req) throws Exception {
+	   	if (req.getQuantita()>1) {
+			 throw new Exception("Non puoi acquistare più di una copia digitale dello stesso libro");
+		}
+	   if (itemGiaPresente.isPresent()) {
+	       log.info("Ebook già presente nel carrello, non incremento");
+	       return; 
+	   }
+	   req.setQuantita(1); 
+	   
+       log.debug("Nuovo inserimento nel carrello"); 
+       CarrelloItem nuovoItem = new CarrelloItem();
+       nuovoItem.setCarrello(carrello);
+       nuovoItem.setFormatoLibro(formato);
+       nuovoItem.setQuantita(req.getQuantita());
+       nuovoItem.setPrezzoUnitario(formato.getPrezzo()); 
+
+       carrello.getItems().add(nuovoItem);
+       
+       carrelloRepo.save(carrello);
+	   
+   }
+   
+   private void aggiuntaCartaceo(Optional<CarrelloItem> itemGiaPresente, Carrello carrello, FormatoLibro formato, CarrelloReq req) throws Exception {
+       // check disponibilità (solo per i fisici)
+       int quantitaLibriRichiesta = req.getQuantita();
+       if (itemGiaPresente.isPresent()) {
+           quantitaLibriRichiesta += itemGiaPresente.get().getQuantita();
+       }
+       
+       // Controllo disponibilità magazzino (solo per fisici, perché null != null è gestito sopra)
+       if (formato.getQuantita() != null) {
+           if (formato.getQuantita() < quantitaLibriRichiesta) {
+               throw new Exception("Quantità non disponibile. Disponibili solo: " + formato.getQuantita() + "pezzi");
+           }
+       }
+       
+       // Aggiunta o Aggiornamento reale
+       if (itemGiaPresente.isPresent()) {
+           log.debug("Aumento quantità nel carrello");   
+           CarrelloItem item = itemGiaPresente.get();
+           //gli ebook non arriveranno mai qui grazie al return sopra
+           item.setQuantita(item.getQuantita() + req.getQuantita());
+           item.setPrezzoUnitario(formato.getPrezzo());
+       } else {
+           log.debug("Nuovo inserimento nel carrello"); 
+           CarrelloItem nuovoItem = new CarrelloItem();
+           nuovoItem.setCarrello(carrello);
+           nuovoItem.setFormatoLibro(formato);
+           nuovoItem.setQuantita(req.getQuantita());
+           nuovoItem.setPrezzoUnitario(formato.getPrezzo()); 
+
+           carrello.getItems().add(nuovoItem);
+       }
+       
+       carrelloRepo.save(carrello);
+   }
+    
+    
+
 
     private Carrello getOrCreateCarrello(Long idUtente) {
         log.debug("Metodo getOrCreateCarrello id utente: {}", idUtente);
