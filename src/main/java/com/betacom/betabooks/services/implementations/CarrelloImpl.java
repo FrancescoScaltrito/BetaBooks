@@ -42,6 +42,7 @@ public class CarrelloImpl implements ICarrelloServices {
     public void aggiungiOAggiornaProdotto(CarrelloReq req) throws Exception {
 
 	    log.debug("Aggiornamento carrello {}", req);
+	    
 	    FormatoLibro formato = formatoRepo.findById(req.getIdFormatoLibro())
 	    .orElseThrow(() -> new Exception("Formato libro non trovato"));
 	

@@ -11,6 +11,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -39,6 +40,6 @@ public class Utente {
     @Column(name = "ruolo")
     private RuoloUtente ruolo = RuoloUtente.USER;
     
-    @OneToOne(mappedBy = "utente", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "utente", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)
     private Carrello carrello;
 }

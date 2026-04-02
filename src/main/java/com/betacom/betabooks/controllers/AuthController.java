@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
+@RequiredArgsConstructor@CrossOrigin(origins = "http://localhost:4200")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -27,13 +28,22 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<UtenteDTO> login(@RequestBody UtenteReq req) {
+    	
+    	System.out.println("--- TENTATIVO LOGIN ---");
+        System.out.println("Email ricevuta: " + req.getEmail());
+        System.out.println("Password ricevuta: " + req.getPassword());
+        
         try {
+        	System.out.println("--- INIZIO AUTENTICAZIONE PER: " + req.getEmail());
+        	
             authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword())
             );
+            
+            System.out.println("--- AUTENTICAZIONE RIUSCITA! ---");
 
             Utente utente = utenteRepository.findByEmail(req.getEmail())
-                    .orElseThrow(() -> new Exception("Utente non trovato"));
+                    .orElseThrow(() -> new RuntimeException("Utente non trovato dopo autenticazione"));
 
             UtenteDTO dto = UtenteDTO.builder()
                     .id(utente.getId())
@@ -43,10 +53,15 @@ public class AuthController {
 
             return ResponseEntity.ok(dto);
 
-        } catch (AuthenticationException e) {
+        } /*catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }*/
+        catch (AuthenticationException e) {
+            System.out.println("--- ERRORE AUTENTICAZIONE: " + e.getMessage());
+            e.printStackTrace(); // <--- QUESTO CI DICE TUTTO
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 }

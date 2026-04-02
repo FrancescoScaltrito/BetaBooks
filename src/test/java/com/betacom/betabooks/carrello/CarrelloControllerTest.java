@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.betabooks.controllers.CarrelloController;
 import com.betacom.betabooks.dto.inputs.CarrelloReq;
@@ -35,59 +36,22 @@ import org.springframework.http.ResponseEntity;
 @Slf4j
 @RequiredArgsConstructor
 @SpringBootTest
+@Transactional
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class CarrelloControllerTest {
 	
 	@Autowired
 	private CarrelloController carrelloC;
-
-
 	
-	@SuppressWarnings("unchecked")
+	private static final long ID_CARTACEO=1L;
+	private static final long ID_EBOOK=15L;
+	
 	@Test
-	@Order(1)	
-	public void myTest() throws Exception {
-		
-
-		aggiungiProdottoSuccesso();
-		aggiungiProdottoNonAttivo();
-		aggiungiDueEbook();
-		aggiungiEbookPresente();
-		aggiungiCopieNonDisponibili();
-		getByUtente();
-		eliminaProdottoSuccesso();
-		eliminaProdottoFailure();
-		
-		aumenta();
-		decrementa();
-		svuota();
-		
-
-	}
-	
-	
-	
-
-	public void getByUtente() {
-		log.debug("Test list carrelli");
-		
-		ResponseEntity<?> resp = carrelloC.getCarrello(1L);
-		assertEquals(HttpStatus.OK, resp.getStatusCode());
-	}
-	
-	public void getCarrelloFailure() {
-		log.debug("Test carrello non esistente");
-		
-		ResponseEntity<?> resp = carrelloC.getCarrello(1000L);
-	    assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-	    assertEquals(("Utente non trovato"), ((Resp) resp.getBody()).getMessage());
-	}
-	
-	@Test()
+	@Order(1)
 	public void aggiungiProdottoSuccesso() throws Exception{
 		log.debug("Aggiunta prodotto nel carrello con successo");
 		CarrelloReq req = new CarrelloReq();
-		req.setIdFormatoLibro(1L);
+		req.setIdFormatoLibro(ID_CARTACEO);
 		req.setIdUtente(1L);
 		req.setQuantita(1);
 
@@ -99,13 +63,14 @@ public class CarrelloControllerTest {
 	    assertEquals("CarrelloController - carrello aggiornato", resp.getBody().getMessage());
 	}
 	
-	@Test()
+	@Test
+	@Order(2)
 	public void aggiungiCopieNonDisponibili() throws Exception{
 		log.debug("Aggiunta troppe copie");
 		CarrelloReq req = new CarrelloReq();
-		req.setIdFormatoLibro(9L);
+		req.setIdFormatoLibro(ID_CARTACEO);
 		req.setIdUtente(1L);
-		req.setQuantita(100);
+		req.setQuantita(1000);
 
 		ResponseEntity<Resp> resp = carrelloC.aggiungiProdotto(req);
 
@@ -113,7 +78,8 @@ public class CarrelloControllerTest {
 	    assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 	}
 	
-	@Test()
+	@Test
+	@Order(3)
 	public void aggiungiEbookPresente() throws Exception{
 		log.debug("Aggiunta di due ebook nel carrello");
 		CarrelloReq req = new CarrelloReq();
@@ -129,7 +95,8 @@ public class CarrelloControllerTest {
 	    assertEquals(("Ebook già presente nel carrello, non incremento"), resp.getBody().getMessage());
 	}
 	
-	@Test()
+	@Test
+	@Order(4)
 	public void aggiungiDueEbook() throws Exception{
 		log.debug("Aggiunta di due ebook nel carrello");
 		CarrelloReq req = new CarrelloReq();
@@ -145,7 +112,8 @@ public class CarrelloControllerTest {
 	    assertEquals(("Non puoi acquistare più di una copia digitale dello stesso libro"), resp.getBody().getMessage());
 	}
 	
-	@Test()
+	@Test
+	@Order(5)
 	public void aggiungiProdottoNonAttivo() throws Exception{
 		log.debug("Aggiunta prodotto non attivo nel carrello");
 		CarrelloReq req = new CarrelloReq();
@@ -162,23 +130,78 @@ public class CarrelloControllerTest {
 	    assertEquals("Spiacenti, questo formato non è più disponibile.", resp.getBody().getMessage());
 	}
 
-	public void aumenta() throws Exception{
+	@Test
+	@Order(6)
+	public void aumentaSuccesso() throws Exception{
+		
+		ResponseEntity<?> resp = carrelloC.aumenta(17L);
+		assertEquals(HttpStatus.OK, resp.getStatusCode());
+		assertEquals("Quantità aggiornata con successo", ((Resp) resp.getBody()).getMessage());
 		
 	}
-	public void decrementa() throws Exception{
+	
+	@Test
+	@Order(7)
+	public void aumentaFallimento() throws Exception{
+		
+		ResponseEntity<?> resp = carrelloC.aumenta(15L);
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		assertEquals("Non puoi acquistare più di una copia digitale dello stesso libro", ((Resp) resp.getBody()).getMessage());
 		
 	}
-	public void svuota() throws Exception{
+	
+	@Test
+	@Order(8)
+	public void getByUtente() {
+		log.debug("Test list carrelli");
+		
+		ResponseEntity<?> resp = carrelloC.getCarrello(1L);
+		assertEquals(HttpStatus.OK, resp.getStatusCode());
+	}
+	
+	@Test
+	@Order(9)
+	public void getCarrelloFailure() {
+		log.debug("Test carrello non esistente");
+		
+		ResponseEntity<?> resp = carrelloC.getCarrello(1000L);
+	    assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+	    assertEquals(("Utente non trovato"), ((Resp) resp.getBody()).getMessage());
+	}
+	
+	@Test
+	@Order(10)
+	public void decrementaSuccesso() throws Exception{
+		
+		ResponseEntity<?> resp = carrelloC.decrementa(15L);
+		assertEquals(HttpStatus.OK, resp.getStatusCode());
+		assertEquals("Quantità aggiornata con successo", ((Resp) resp.getBody()).getMessage());
 		
 	}
+	
+	@Test
+	@Order(11)
+	public void decrementaFallimento() throws Exception{
+		
+		ResponseEntity<?> resp = carrelloC.decrementa(100L);
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		assertEquals("Elemento del carrello non trovato", ((Resp) resp.getBody()).getMessage());
+		
+	}
+
+
+	@Test
+	@Order(12)
 	public void eliminaProdottoSuccesso() throws Exception{
 		
-		ResponseEntity<?> resp = carrelloC.rimuoviItem(14L);
+		ResponseEntity<?> resp = carrelloC.rimuoviItem(15L);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		 assertEquals("CarrelloController - eliminazione item carrello riuscita", ((Resp) resp.getBody()).getMessage());
 		
 	}
 	
+	@Test
+	@Order(13)
 	public void eliminaProdottoFailure() throws Exception{
 		
 
@@ -186,5 +209,13 @@ public class CarrelloControllerTest {
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 		 assertEquals("Elemento del carrello non trovato", ((Resp) resp.getBody()).getMessage());
 		
+	}
+	
+	@Test
+	@Order(14)
+	public void svuota() throws Exception{
+		ResponseEntity<?> resp = carrelloC.svuota(1L);
+		assertEquals(HttpStatus.OK, resp.getStatusCode());
+		 assertEquals("CarrelloController - svuota carrello riuscito", ((Resp) resp.getBody()).getMessage());
 	}
 }

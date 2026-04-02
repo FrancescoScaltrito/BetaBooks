@@ -3,6 +3,7 @@ package com.betacom.betabooks.controllers;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/utenti")
+@CrossOrigin(origins = "http://localhost:4200")
 public class UtenteController {
 
     private final IUtenteRepository utenteRepository;
@@ -45,7 +47,10 @@ public class UtenteController {
         Utente utente = new Utente();
         utente.setEmail(req.getEmail());
         utente.setPassword(passwordEncoder.encode(req.getPassword()));
-        utente.setRuolo(RuoloUtente.valueOf(req.getRuolo()));
+        //utente.setRuolo(RuoloUtente.valueOf(req.getRuolo()));
+        
+        String ruoloDaSettare = (req.getRuolo() != null) ? req.getRuolo() : "USER";
+        utente.setRuolo(RuoloUtente.valueOf(ruoloDaSettare));
 
         Utente salvato = utenteRepository.save(utente);
 
