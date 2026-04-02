@@ -154,6 +154,10 @@ public class CarrelloImpl implements ICarrelloServices {
     @Transactional
     public CarrelloDTO findByUtente(Long idUtente) {
         log.debug("Metodo findByUtente: sincronizzazione e visualizzazione carrello utente: {}", idUtente);
+        
+        if (!utenteRepo.existsById(idUtente)) {
+            throw new RuntimeException("Utente non trovato");
+        }
 
         Optional<Carrello> carrelloOpt = carrelloRepo.findByUtenteId(idUtente);
 

@@ -44,7 +44,7 @@ public class CarrelloControllerTest {
 	private CarrelloController carrelloC;
 	
 	private static final long ID_CARTACEO=1L;
-	private static final long ID_EBOOK=15L;
+	private static final long ID_EBOOK=10L;
 	
 	@Test
 	@Order(1)
@@ -166,7 +166,7 @@ public class CarrelloControllerTest {
 		
 		ResponseEntity<?> resp = carrelloC.getCarrello(1000L);
 	    assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-	    assertEquals(("Utente non trovato"), ((Resp) resp.getBody()).getMessage());
+	    assertEquals(("Errore nel recupero del carrello: Utente non trovato"), ((Resp) resp.getBody()).getMessage());
 	}
 	
 	@Test
@@ -217,5 +217,28 @@ public class CarrelloControllerTest {
 		ResponseEntity<?> resp = carrelloC.svuota(1L);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		 assertEquals("CarrelloController - svuota carrello riuscito", ((Resp) resp.getBody()).getMessage());
+	}
+	
+	@Test
+	@Order(15)
+	public void svuotaFailure() throws Exception{
+		ResponseEntity<?> resp = carrelloC.svuota(1000L);
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+	}
+	
+	@Test
+	@Order(16)
+	public void spostaInWishlist() throws Exception{
+		ResponseEntity<?> resp = carrelloC.spostaInWishlist(18L);
+		assertEquals(HttpStatus.OK, resp.getStatusCode());
+		 assertEquals("Prodotto spostato nella wishlist con successo", ((Resp) resp.getBody()).getMessage());
+	}
+	
+	@Test
+	@Order(17)
+	public void spostaInWishlistFailure() throws Exception{
+		ResponseEntity<?> resp = carrelloC.spostaInWishlist(19L);
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		 assertEquals("Errore durante lo spostamento: Item non trovato", ((Resp) resp.getBody()).getMessage());
 	}
 }
