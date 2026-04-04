@@ -2,8 +2,8 @@ package com.betacom.betabooks.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,48 +12,32 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.betacom.betabooks.dto.inputs.UtenteReq;
+import com.betacom.betabooks.dto.outputs.UtenteDTO;
+import com.betacom.betabooks.enums.RuoloUtente;
 import com.betacom.betabooks.models.Utente;
 import com.betacom.betabooks.repositories.IUtenteRepository;
-import com.betacom.betabooks.security.JwtUtil;
-import com.betacom.betabooks.services.interfaces.IUtenteServices;
-
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
-import com.betacom.betabooks.dto.outputs.UtenteDTO;
-
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/utenti")
+@CrossOrigin(origins = "http://localhost:4200")
 public class UtenteController {
 
-    private final IUtenteServices utenteService; // Usiamo solo il service!
-    private final PasswordEncoder passwordEncoder; 
     private final IUtenteRepository utenteRepository;
-    
+    private final PasswordEncoder passwordEncoder;
 
-    public UtenteController(IUtenteServices utenteService, 
-                            PasswordEncoder passwordEncoder,
-                            IUtenteRepository utenteRepository) {
-        this.utenteService = utenteService;
-        this.passwordEncoder = passwordEncoder;
+    public UtenteController(IUtenteRepository utenteRepository, PasswordEncoder passwordEncoder) {
         this.utenteRepository = utenteRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UtenteReq req) {
-        // Deve corrispondere al nome della variabile sopra!
-        Map<String, Object> response = utenteService.login(req); 
-        return ResponseEntity.ok(response);
-    }
-
+   
     @PostMapping("/register")
     @SecurityRequirement(name = "") 
     public ResponseEntity<UtenteDTO> register(@RequestBody UtenteReq req) {
@@ -63,6 +47,10 @@ public class UtenteController {
         Utente utente = new Utente();
         utente.setEmail(req.getEmail());
         utente.setPassword(passwordEncoder.encode(req.getPassword()));
+        //utente.setRuolo(RuoloUtente.valueOf(req.getRuolo()));
+        
+        String ruoloDaSettare = (req.getRuolo() != null) ? req.getRuolo() : "USER";
+        utente.setRuolo(RuoloUtente.valueOf(ruoloDaSettare));
 
         Utente salvato = utenteRepository.save(utente);
 

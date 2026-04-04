@@ -40,6 +40,9 @@ import lombok.extern.slf4j.Slf4j;
 @CrossOrigin(origins = "http://localhost:4200")
 public class LibroController {
 	
+
+    private final AuthController authController;
+
 	private final ILibroServices libroS;
 
 

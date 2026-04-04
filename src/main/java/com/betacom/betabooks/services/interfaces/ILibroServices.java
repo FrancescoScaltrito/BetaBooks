@@ -37,6 +37,7 @@ public interface ILibroServices {
     
     List<LibroDTO> find(String query, List<String> categorie, BigDecimal prezzoMin, BigDecimal prezzoMax,
 			TipoCopertina tipoCopertina, TipoSupporto tipoSupporto) throws Exception;
+
     
     
 }

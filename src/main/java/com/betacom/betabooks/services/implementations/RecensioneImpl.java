@@ -7,10 +7,12 @@ import org.springframework.stereotype.Service;
 
 import com.betacom.betabooks.dto.inputs.RecensioneReq;
 import com.betacom.betabooks.dto.outputs.RecensioneDTO;
+import com.betacom.betabooks.enums.StatoOrdine;
 import com.betacom.betabooks.models.Libro;
 import com.betacom.betabooks.models.ProfiloUtente;
 import com.betacom.betabooks.models.Recensione;
 import com.betacom.betabooks.repositories.ILibroRepository;
+import com.betacom.betabooks.repositories.IOrdineItemRepository;
 import com.betacom.betabooks.repositories.IProfiloUtenteRepository;
 import com.betacom.betabooks.repositories.IRecensioneRepository;
 import com.betacom.betabooks.services.interfaces.IRecensioneServices;
@@ -27,6 +29,7 @@ public class RecensioneImpl implements IRecensioneServices{
 	private final IRecensioneRepository recensioneR;
 	private final IProfiloUtenteRepository profiloUtente;
 	private final ILibroRepository libroR;
+	private final IOrdineItemRepository ordineItemR;
 	
 	@Override
 	public Long create(RecensioneReq req) throws Exception {
@@ -40,6 +43,12 @@ public class RecensioneImpl implements IRecensioneServices{
 		}
 		if (req.getValutazione() == null || req.getValutazione()<1 || req.getValutazione()>5) {
 			throw new Exception("La valutazione deve essere compresa tra 1 e 5");
+		}
+		
+		boolean consegnato = ordineItemR.existsByOrdine_Utente_IdAndFormatoLibro_Libro_IdAndOrdine_Stato(req.getIdUtente(), req.getIdLibro(), StatoOrdine.CONSEGNATO);
+		
+		if (!consegnato) {
+			throw new Exception("Non puoi inserire una recensione per un libro non acquistato o non consegnato!");
 		}
 		
 		ProfiloUtente profilo = profiloUtente.findByUtenteId(req.getIdUtente())

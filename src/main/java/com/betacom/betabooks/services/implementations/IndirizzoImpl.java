@@ -121,11 +121,8 @@ public class IndirizzoImpl implements IIndirizzoServices {
     
     @Override
     public IndirizzoDTO findPredefinitoByUtente(Long idUtente) throws Exception {
-
-        Indirizzo i = indirizzoR.findByUtenteIdAndIsDefaultTrue(idUtente);
-
-        if (i == null)
-            throw new Exception("Nessun indirizzo predefinito");
+        Indirizzo i = indirizzoR.findByUtenteIdAndIsDefaultTrue(idUtente)
+                .orElseThrow(() -> new Exception("Nessun indirizzo predefinito trovato"));
 
         return toDTO(i);
     }

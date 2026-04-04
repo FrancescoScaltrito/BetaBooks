@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/indirizzi")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:4200")
 public class IndirizzoController {
 
     private final IIndirizzoServices indirizzoService;

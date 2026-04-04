@@ -187,13 +187,14 @@ public class LibroImpl implements ILibroServices {
 		if (req.getAttivo() != null)
 			formato.setAttivo(req.getAttivo());
 		
-		if((req.getPrezzo().compareTo( new BigDecimal(0) )) == -1 ) {
-			log.error("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-			throw new Exception("Costo non può essere <0");
-		}
-		if(req.getTipoSupporto() == TipoSupporto.CARTACEO &&
-				req.getQuantita()<0
-				)throw new Exception("Quantità non può essere <0 per i cartacei");
+
+		if((req.getPrezzo().compareTo( new BigDecimal(0) )) == -1 ) throw new Exception("Costo non può essere <0");
+
+		if((req.getPrezzo().compareTo( new BigDecimal(0) )) == -1 )	throw new Exception("Costo non può essere <0");
+		
+		if(req.getTipoSupporto() == TipoSupporto.CARTACEO && req.getQuantita()<0)
+			throw new Exception("Quantità non può essere <0 per i cartacei");
+		
 		if(req.getTipoSupporto() == TipoSupporto.EBOOK)
 			formato.setQuantita(null);
 			
