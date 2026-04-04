@@ -1,12 +1,18 @@
+
 package com.betacom.betabooks.controllers;
 
-import java.math.BigDecimal;
 
+import org.springframework.http.MediaType;
+
+import java.math.BigDecimal;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -19,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.betacom.betabooks.dto.inputs.FormatoLibroReq;
 import com.betacom.betabooks.dto.inputs.LibroReq;
+import com.betacom.betabooks.enums.TipoCopertina;
 import com.betacom.betabooks.enums.TipoSupporto;
 import com.betacom.betabooks.response.Resp;
 import com.betacom.betabooks.services.interfaces.ILibroServices;
@@ -30,29 +37,33 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/libro")
+@CrossOrigin(origins = "http://localhost:4200")
 public class LibroController {
-
+	
+    private final AuthController authController;
 	private final ILibroServices libroS;
+
 
 	// Libro
 
 	// METODO OBSOLETO, LO LASCIO NON SI SA MAI
 
-//    @PostMapping("/create")
-//    public ResponseEntity<Resp> create(@RequestBody(required = true) LibroReq req) {
-//        log.debug("LibroController - create {}", req);
-//        Resp response = new Resp();
-//        HttpStatus status = HttpStatus.OK;
-//        try {
-//            libroS.create(req);
-//            response.setMessage("LibroController - Libro creato");
-//        } catch (Exception e) {
-//            log.error("ERRORE LibroController - " + e.getMessage());
-//            response.setMessage(e.getMessage());
-//            status = HttpStatus.BAD_REQUEST;
-//        }
-//        return ResponseEntity.status(status).body(response);
-//    }
+    @PostMapping("/create")
+    public ResponseEntity<Resp> create(@RequestBody(required = true) LibroReq req) {
+        log.debug("LibroController - create {}", req);
+        Resp response = new Resp();
+        HttpStatus status = HttpStatus.OK;
+        try {
+            libroS.create(req);
+            response.setMessage("LibroController - Libro creato");
+        } catch (Exception e) {
+            log.error("ERRORE LibroController - " + e.getMessage());
+            response.setMessage(e.getMessage());
+            status = HttpStatus.BAD_REQUEST;
+        }
+        return ResponseEntity.status(status).body(response);
+    }
+		
 
 	@PutMapping("/update")
 	public ResponseEntity<Resp> update(@RequestBody(required = true) LibroReq req) {
@@ -129,28 +140,26 @@ public class LibroController {
 
 	// Formato
 
-	// METODO OBSOLETO, LO LASCIO NON SI SA MAI
-
-//    @PostMapping("/formato/create")
-//    public ResponseEntity<Resp> createFormato(@RequestBody(required = true) FormatoLibroReq req) {
-//        log.debug("LibroController - createFormato {}", req);
-//        Resp response = new Resp();
-//        HttpStatus status = HttpStatus.OK;
-//        try {
-//            libroS.createFormato(req);
-//            response.setMessage("LibroController - Formato creato");
-//        } catch (Exception e) {
-//            log.error("ERRORE LibroController - " + e.getMessage());
-//            response.setMessage(e.getMessage());
-//            status = HttpStatus.BAD_REQUEST;
-//        }
-//        return ResponseEntity.status(status).body(response);
-//    }
-
 	/*
 	 * Modifica i dati di un formato esistente (prezzo, isbn, quantita, attivo) Non
 	 * cambia il tipo di supporto (CARTACEO/EBOOK)
 	 */
+	
+	@PostMapping("/formato/create/{idLibro}")
+	public ResponseEntity<Object> createFormato(
+	        @PathVariable Long idLibro,
+	        @RequestBody LibroReq req) {
+	    Object response;
+	    HttpStatus status = HttpStatus.OK;
+	    try {
+	        response = libroS.createFormatoLibro(idLibro, req);
+	    } catch (Exception e) {
+	        log.error("ERRORE LibroController - " + e.getMessage());
+	        response = e.getMessage();
+	        status = HttpStatus.BAD_REQUEST;
+	    }
+	    return ResponseEntity.status(status).body(response);
+	}
 
 	@PutMapping("/formato/update")
 	public ResponseEntity<Resp> updateFormato(@RequestBody(required = true) FormatoLibroReq req) {
@@ -231,7 +240,7 @@ public class LibroController {
 	 * Carica o sostituisce la copertina di un formato
 	 */
 
-	@PostMapping(value = "/formato/creaCopertina/{idFormato}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PostMapping(value = "/formato/copertina/{idFormato}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<Resp> uploadCopertina(@PathVariable Long idFormato, @RequestPart("file") MultipartFile file) {
 		log.debug("LibroController - uploadCopertina formato {}", idFormato);
 		Resp response = new Resp();
@@ -266,47 +275,27 @@ public class LibroController {
 		}
 		return ResponseEntity.status(status).body(response);
 	}
-
-	/*
-	 * crea libro cartaceo con i campi obbligatori
-	 */
-
-	@PostMapping("/crea-cartaceo")
-	public ResponseEntity<Resp> creaCartaceo(@RequestBody LibroReq req) {
-		log.debug("LibroController - creaCartaceo {}", req);
-		Resp response = new Resp();
+	
+	@GetMapping("/cerca")
+	public ResponseEntity<Object> cerca(
+			@RequestParam(required = false) String query,
+			@RequestParam(required = false) List<String> categorie,
+			@RequestParam(required = false) BigDecimal prezzoMin,
+			@RequestParam(required = false) BigDecimal prezzoMax,
+			@RequestParam(required = false) TipoSupporto tipoSupporto,
+			@RequestParam(required = false) TipoCopertina tipoCopertina
+			){
+		Object response;
 		HttpStatus status = HttpStatus.OK;
 		try {
-			libroS.creaCartaceo(req);
-			response.setMessage("Libro cartaceo creato con successo");
-		} catch (Exception e) {
-			log.error("ERRORE LibroController - " + e.getMessage());
-			response.setMessage(e.getMessage());
+			response = libroS.find(query, categorie, prezzoMin, prezzoMax, tipoCopertina, tipoSupporto);
+		}catch(Exception e) {
+			log.error("Ricerca fallita..."+e.getMessage());
+			response = e.getMessage();
 			status = HttpStatus.BAD_REQUEST;
 		}
 		return ResponseEntity.status(status).body(response);
 	}
-
-	/*
-	 * crea libro ebook con i campi obbligatori da swagger fa vedere anche campi
-	 * inutili come il tipo copertina o la qtà ma vengono ignorati
-	 */
-
-	@PostMapping("/crea-ebook")
-	public ResponseEntity<Resp> creaEbook(@RequestBody LibroReq req) {
-		log.debug("LibroController - creaEbook {}", req);
-		Resp response = new Resp();
-		HttpStatus status = HttpStatus.OK;
-		try {
-			libroS.creaEbook(req);
-			response.setMessage("Ebook creato con successo");
-		} catch (Exception e) {
-			log.error("ERRORE LibroController - " + e.getMessage());
-			response.setMessage(e.getMessage());
-			status = HttpStatus.BAD_REQUEST;
-		}
-		return ResponseEntity.status(status).body(response);
-	}
-
-
+	
 }
+	

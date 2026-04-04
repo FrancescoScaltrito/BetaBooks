@@ -10,8 +10,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class ProfiloDTO {
+	private Long id;
+	private Long idUtente;
     private String nome;
     private String cognome;
     private String telefono;
-    private UtenteDTO utente; // Dati base dell'account
 }

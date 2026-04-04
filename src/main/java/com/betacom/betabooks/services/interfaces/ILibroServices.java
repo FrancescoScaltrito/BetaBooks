@@ -9,27 +9,35 @@ import com.betacom.betabooks.dto.inputs.FormatoLibroReq;
 import com.betacom.betabooks.dto.inputs.LibroReq;
 import com.betacom.betabooks.dto.outputs.FormatoLibroDTO;
 import com.betacom.betabooks.dto.outputs.LibroDTO;
+import com.betacom.betabooks.enums.TipoCopertina;
 import com.betacom.betabooks.enums.TipoSupporto;
 
 public interface ILibroServices {
 
-//    Long create(LibroReq req) throws Exception;
+	Long create(LibroReq req) throws Exception;
     void update(LibroReq req) throws Exception;
     void delete(Long id) throws Exception;
     LibroDTO findById(Long id) throws Exception;
     List<LibroDTO> findAll() throws Exception;
 
-   
-//    Long createFormato(FormatoLibroReq req) throws Exception;
     void updateFormato(FormatoLibroReq req) throws Exception;
     void disattivaFormato(Long idFormato) throws Exception;
     List<FormatoLibroDTO> findFormatiByLibro(Long idLibro) throws Exception;
     FormatoLibroDTO findFormatoById(Long idFormato) throws Exception;
 
     void salvaCopertina(Long idFormato, MultipartFile file) throws Exception;
-    LibroDTO findFormatoByIdCompleto(Long idFormato) throws Exception;
+    FormatoLibroDTO findFormatoByIdCompleto(Long idFormato) throws Exception;
     
-    Long creaCartaceo(LibroReq req) throws Exception;
-    Long creaEbook(LibroReq req) throws Exception;
-   
+    Long createFormatoLibro(Long idLibro, LibroReq req) throws Exception;
+    
+    
+    
+//    Long creaCartaceo(LibroReq req) throws Exception;
+//    Long creaEbook(LibroReq req) throws Exception;
+    
+    List<LibroDTO> find(String query, List<String> categorie, BigDecimal prezzoMin, BigDecimal prezzoMax,
+    		TipoCopertina tipoCopertina, TipoSupporto tipoSupporto
+    		)throws Exception;
+    
+    
 }
