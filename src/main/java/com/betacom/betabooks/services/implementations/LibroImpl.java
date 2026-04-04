@@ -1,5 +1,6 @@
 package com.betacom.betabooks.services.implementations;
 
+import java.math.BigDecimal;
 import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
@@ -13,6 +14,7 @@ import com.betacom.betabooks.dto.inputs.FormatoLibroReq;
 import com.betacom.betabooks.dto.inputs.LibroReq;
 import com.betacom.betabooks.dto.outputs.FormatoLibroDTO;
 import com.betacom.betabooks.dto.outputs.LibroDTO;
+import com.betacom.betabooks.enums.TipoCopertina;
 import com.betacom.betabooks.enums.TipoSupporto;
 import com.betacom.betabooks.models.Autore;
 import com.betacom.betabooks.models.Categoria;
@@ -138,6 +140,12 @@ public class LibroImpl implements ILibroServices {
 	    if (req.getTipoSupporto() == null) throw new Exception("Tipo supporto non può essere null");
 	    if (req.getIsbn() != null && formatoR.existsByIsbn(req.getIsbn()))
 	        throw new Exception("ISBN " + req.getIsbn() + " già presente");
+	    
+	    String isbnRegex = "^[0-9]{13}$";
+
+	    if (req.getIsbn() == null || !req.getIsbn().matches(isbnRegex)) {
+	        throw new Exception("ISBN non valido: deve contenere esattamente 13 cifre numeriche");
+	    }
 
 	    Libro libro = libR.findById(idLibro).orElseThrow( () -> new Exception("Libro non trovato"));
 
@@ -178,7 +186,17 @@ public class LibroImpl implements ILibroServices {
 			formato.setQuantita(req.getQuantita());
 		if (req.getAttivo() != null)
 			formato.setAttivo(req.getAttivo());
-
+		
+		if((req.getPrezzo().compareTo( new BigDecimal(0) )) == -1 ) {
+			log.error("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+			throw new Exception("Costo non può essere <0");
+		}
+		if(req.getTipoSupporto() == TipoSupporto.CARTACEO &&
+				req.getQuantita()<0
+				)throw new Exception("Quantità non può essere <0 per i cartacei");
+		if(req.getTipoSupporto() == TipoSupporto.EBOOK)
+			formato.setQuantita(null);
+			
 		formatoR.save(formato);
 	}
 
@@ -227,6 +245,18 @@ public class LibroImpl implements ILibroServices {
 		FormatoLibro formato = formatoR.findById(idFormato).orElseThrow(() -> new Exception("Formato non trovato"));
 		FormatoLibroDTO dto = FLmapper.buildFormatoLibroDTO(formato);
 		return dto;
+	}
+
+	@Override
+	public List<LibroDTO> find(String query, List<String> categorie, BigDecimal prezzoMin, BigDecimal prezzoMax,
+			TipoCopertina tipoCopertina, TipoSupporto tipoSupporto) throws Exception {
+		
+		String q = (query != null && !query.isBlank()) ? query : null;
+		
+		List<Libro> libri = libR.search(q, categorie, prezzoMin, prezzoMax, tipoSupporto, tipoCopertina);
+		return libri.stream().map(
+				l -> mapper.buildLibroDTO(l)
+				).toList();
 	}
 
 

@@ -1,5 +1,6 @@
 package com.betacom.betabooks.services.interfaces;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -8,6 +9,8 @@ import com.betacom.betabooks.dto.inputs.FormatoLibroReq;
 import com.betacom.betabooks.dto.inputs.LibroReq;
 import com.betacom.betabooks.dto.outputs.FormatoLibroDTO;
 import com.betacom.betabooks.dto.outputs.LibroDTO;
+import com.betacom.betabooks.enums.TipoCopertina;
+import com.betacom.betabooks.enums.TipoSupporto;
 
 public interface ILibroServices {
 
@@ -31,6 +34,9 @@ public interface ILibroServices {
     
 //    Long creaCartaceo(LibroReq req) throws Exception;
 //    Long creaEbook(LibroReq req) throws Exception;
+    
+    List<LibroDTO> find(String query, List<String> categorie, BigDecimal prezzoMin, BigDecimal prezzoMax,
+			TipoCopertina tipoCopertina, TipoSupporto tipoSupporto) throws Exception;
     
     
 }

@@ -1,10 +1,15 @@
+
 package com.betacom.betabooks.controllers;
 
-import java.math.BigDecimal;
 
+import org.springframework.http.MediaType;
+
+import java.math.BigDecimal;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -20,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.betacom.betabooks.dto.inputs.FormatoLibroReq;
 import com.betacom.betabooks.dto.inputs.LibroReq;
+import com.betacom.betabooks.enums.TipoCopertina;
 import com.betacom.betabooks.enums.TipoSupporto;
 import com.betacom.betabooks.response.Resp;
 import com.betacom.betabooks.services.interfaces.ILibroServices;
@@ -31,9 +37,11 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/libro")
+@CrossOrigin(origins = "http://localhost:4200")
 public class LibroController {
-
+	
 	private final ILibroServices libroS;
+
 
 	// Libro
 
@@ -261,6 +269,27 @@ public class LibroController {
 			response = libroS.findFormatoByIdCompleto(id);
 		} catch (Exception e) {
 			log.error("ERRORE LibroController - " + e.getMessage());
+			response = e.getMessage();
+			status = HttpStatus.BAD_REQUEST;
+		}
+		return ResponseEntity.status(status).body(response);
+	}
+	
+	@GetMapping("/cerca")
+	public ResponseEntity<Object> cerca(
+			@RequestParam(required = false) String query,
+			@RequestParam(required = false) List<String> categorie,
+			@RequestParam(required = false) BigDecimal prezzoMin,
+			@RequestParam(required = false) BigDecimal prezzoMax,
+			@RequestParam(required = false) TipoSupporto tipoSupporto,
+			@RequestParam(required = false) TipoCopertina tipoCopertina
+			){
+		Object response;
+		HttpStatus status = HttpStatus.OK;
+		try {
+			response = libroS.find(query, categorie, prezzoMin, prezzoMax, tipoCopertina, tipoSupporto);
+		}catch(Exception e) {
+			log.error("Ricerca fallita..."+e.getMessage());
 			response = e.getMessage();
 			status = HttpStatus.BAD_REQUEST;
 		}
