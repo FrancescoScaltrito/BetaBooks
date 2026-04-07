@@ -6,6 +6,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,14 +18,36 @@ import com.betacom.betabooks.models.Utente;
 import com.betacom.betabooks.repositories.IUtenteRepository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor@CrossOrigin(origins = "http://localhost:4200")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:4200")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final IUtenteRepository utenteRepository;
+    
+    @GetMapping("/me")
+    public ResponseEntity<UtenteDTO> getMe(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        // Il 'name' dell'authentication è l'email (o username) usata nel login
+        Utente utente = utenteRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+
+        UtenteDTO dto = UtenteDTO.builder()
+                .id(utente.getId())
+                .email(utente.getEmail())
+                .ruolo(utente.getRuolo().name())
+                // Aggiungi qui nome e cognome se li hai nel DTO per mostrarli in Angular!
+                .build();
+
+        return ResponseEntity.ok(dto);
+    }
 
     @PostMapping("/login")
     public ResponseEntity<UtenteDTO> login(@RequestBody UtenteReq req) {

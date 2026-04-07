@@ -1,5 +1,7 @@
 package com.betacom.betabooks.controllers;
 
+import java.security.Principal;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -52,8 +54,9 @@ public class CarrelloController {
 
 
     @GetMapping("/utente/{idUtente}")
-    public ResponseEntity<?> getCarrello(@PathVariable Long idUtente) {
+    public ResponseEntity<?> getCarrello(@PathVariable Long idUtente, Principal principal) {
         log.debug("CarrelloController - visualizzazione carrello dell'utente: {}", idUtente);
+        System.out.println("Utente che sta chiamando: " + (principal != null ? principal.getName() : "ANONIMO"));
         
         try {
             // Se tutto va bene, restituisco direttamente il DTO

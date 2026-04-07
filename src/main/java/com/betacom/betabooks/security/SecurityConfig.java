@@ -9,11 +9,14 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.List;
 
@@ -55,22 +58,30 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(request -> {
-                var config = new org.springframework.web.cors.CorsConfiguration();
-                config.setAllowedOrigins(java.util.List.of("http://localhost:4200"));
-                config.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-                config.setAllowedHeaders(java.util.List.of("*"));
-                config.setAllowCredentials(true);
-                return config;
-            }))
+        .cors(cors -> cors.configurationSource(request -> {
+            var config = new org.springframework.web.cors.CorsConfiguration();
+            config.setAllowedOrigins(java.util.List.of("http://localhost:4200"));
+            config.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+            // IMPORTANTE: specifica Authorization tra gli header permessi
+            config.setAllowedHeaders(java.util.List.of("Authorization", "Content-Type", "Accept")); 
+            config.setAllowCredentials(true);
+            return config;
+        }))
             .csrf(csrf -> csrf.disable())
             // Non usiamo il Bean esterno, lasciamo che il manager faccia il suo lavoro
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
             	    // 1. TUTTO CIÒ CHE È PUBBLICO (Senza login)
+            		.requestMatchers(HttpMethod.GET, "/uploads/**").permitAll() // DEVE ESSERE LA PRIMA RIGA
+            	    .requestMatchers(HttpMethod.GET, "/api/libro/**").permitAll()
             	    .requestMatchers("/api/auth/**", "/api/utenti/register").permitAll()
             	    .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
-            	    .requestMatchers(HttpMethod.GET, "/api/libro/**", "/uploads/**").permitAll()
+            	    .requestMatchers("/api/recensione/**").permitAll()
+            	    .requestMatchers("/api/auth/me").authenticated()
+            	    .requestMatchers("/api/carrello/**").authenticated()
+            	    .requestMatchers("/api/ordine/**").authenticated()
+            	    .requestMatchers("/api/profili/**").authenticated() 
+            	    .requestMatchers("/api/indirizzi/**").authenticated()
 
             	    // 2. CIÒ CHE È SOLO PER ADMIN
             	    // Nota: metti le regole ADMIN PRIMA di anyRequest().authenticated()
@@ -78,7 +89,11 @@ public class SecurityConfig {
             	    
             	    // 3. TUTTO IL RESTO (Richiede login generico)
             	    .anyRequest().authenticated()
-            	); //.httpBasic(org.springframework.security.config.Customizer.withDefaults());
+            	).httpBasic(basic -> basic.authenticationEntryPoint((request, response, authException) -> {
+            	    // Invia 401 ma SENZA l'header che scatena il pop-up nel browser
+            	    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            	    response.getWriter().write("Unauthorized: " + authException.getMessage());
+            	}));
         /* Dato che non usiamo JWT usiamo l'ultima istruzione per implementare la sicurezza basata sui ruoli (RBAC) lato server.
          * Il Pop-up: Il browser riceve una sfida dal server ("Chi sei?") e, prima di darti l'errore 403, farà apparire una finestrella di sistema (quella grigia standard di Chrome/Edge).
 		Sblocco: Inserisci l'email e la password dell'Admin in quella finestrella.
@@ -94,6 +109,7 @@ public class SecurityConfig {
         return http.build();
     }
     
+
     
     /*
     @Bean
@@ -121,4 +137,6 @@ public class SecurityConfig {
 
         return http.build();
     }*/
+    
+
 }

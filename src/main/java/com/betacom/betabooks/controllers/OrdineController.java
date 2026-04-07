@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.betacom.betabooks.dto.outputs.OrdineDTO;
+import com.betacom.betabooks.enums.FiltroTemporale;
 import com.betacom.betabooks.enums.MetodoPagamento;
 import com.betacom.betabooks.enums.StatoOrdine;
 import com.betacom.betabooks.services.interfaces.IAutoreServices;
@@ -123,6 +124,26 @@ public class OrdineController {
         } catch (Exception e) {
             r.setMessage(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(r);
+        }
+    }
+    
+    @GetMapping("/storico/{idUtente}/filtrato")
+    public ResponseEntity<Resp> getStoricoFiltrato(
+            @PathVariable Long idUtente, 
+            @RequestParam boolean completati,
+            @RequestParam(required = false) FiltroTemporale periodo) {
+        
+        Resp r = new Resp();
+        try {
+            // Se 'periodo' non viene passato, nel service sarà gestito come TUTTO
+            List<OrdineDTO> ordini = ordineService.getOrdiniFiltrati(idUtente, completati, periodo);
+            
+            r.setObj(ordini);
+            r.setMessage("Ricerca effettuata con successo");
+            return ResponseEntity.ok(r);
+        } catch (Exception e) {
+            r.setMessage("Errore nel filtro: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(r);
         }
     }
 }

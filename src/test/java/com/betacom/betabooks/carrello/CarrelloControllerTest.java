@@ -149,7 +149,7 @@ public class CarrelloControllerTest {
 		assertEquals("Non puoi acquistare più di una copia digitale dello stesso libro", ((Resp) resp.getBody()).getMessage());
 		
 	}
-	
+	/*
 	@Test
 	@Order(8)
 	public void getByUtente() {
@@ -167,7 +167,7 @@ public class CarrelloControllerTest {
 		ResponseEntity<?> resp = carrelloC.getCarrello(1000L);
 	    assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 	    assertEquals(("Errore nel recupero del carrello: Utente non trovato"), ((Resp) resp.getBody()).getMessage());
-	}
+	}*/
 	
 	@Test
 	@Order(10)

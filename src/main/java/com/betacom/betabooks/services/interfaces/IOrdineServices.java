@@ -3,6 +3,7 @@ package com.betacom.betabooks.services.interfaces;
 import java.util.List;
 import com.betacom.betabooks.dto.inputs.OrdineReq;
 import com.betacom.betabooks.dto.outputs.OrdineDTO;
+import com.betacom.betabooks.enums.FiltroTemporale;
 import com.betacom.betabooks.enums.MetodoPagamento;
 import com.betacom.betabooks.enums.StatoOrdine;
 
@@ -16,6 +17,9 @@ public interface IOrdineServices {
 	 void annullaOrdine(Long idOrdine) throws Exception;
 
 	 void aggiornaStatoOrdine(Long idOrdine, StatoOrdine nuovoStato);
+
+
+	 List<OrdineDTO> getOrdiniFiltrati(Long idUtente, boolean completati, FiltroTemporale filtro);
 
 
 }

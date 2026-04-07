@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import com.betacom.betabooks.dto.outputs.AuditLogDTO;
 import com.betacom.betabooks.dto.outputs.AutoreDTO;
 import com.betacom.betabooks.dto.outputs.CarrelloDTO;
 import com.betacom.betabooks.dto.outputs.CarrelloItemDTO;
@@ -16,6 +17,7 @@ import com.betacom.betabooks.dto.outputs.LibroDTO;
 import com.betacom.betabooks.dto.outputs.OrdineDTO;
 import com.betacom.betabooks.dto.outputs.OrdineItemDTO;
 import com.betacom.betabooks.dto.outputs.RecensioneDTO;
+import com.betacom.betabooks.models.AuditLog;
 import com.betacom.betabooks.models.Autore;
 import com.betacom.betabooks.models.Carrello;
 import com.betacom.betabooks.models.CarrelloItem;
@@ -242,6 +244,27 @@ public class Mapper {
                 .collect(Collectors.toList());
     }
 
+    /*
+     * AUDIT LOG
+     */
+    public static AuditLogDTO buildAuditLogDTO(AuditLog a) {
+        return AuditLogDTO.builder()
+                .id(a.getId())
+                .nomeTabella(a.getNomeTabella())
+                .tipoOperazione(a.getTipoOperazione())
+                .idModificato(a.getIdModificato())
+                .valoriPrecedenti(a.getValoriPrecedenti())
+                .valoriNuovi(a.getValoriNuovi())
+                .utenteDb(a.getUtenteDb())
+                .dataModifica(a.getDataModifica())
+                .build();
+    }
+
+    public static List<AuditLogDTO> buildAuditLogDTO(List<AuditLog> logs) {
+        return logs.stream()
+                .map(Mapper::buildAuditLogDTO)
+                .collect(Collectors.toList());
+    }
     
 }
 

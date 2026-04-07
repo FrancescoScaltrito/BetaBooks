@@ -1,6 +1,10 @@
 package com.betacom.betabooks.ordine;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
 
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -12,9 +16,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.betacom.betabooks.carrello.CarrelloControllerTest;
-import com.betacom.betabooks.controllers.CarrelloController;
+
 import com.betacom.betabooks.controllers.OrdineController;
+import com.betacom.betabooks.enums.FiltroTemporale;
 import com.betacom.betabooks.enums.MetodoPagamento;
 import com.betacom.betabooks.enums.StatoOrdine;
 import com.betacom.betabooks.response.Resp;
@@ -103,4 +107,43 @@ public class OrdineControllerTest {
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 		 assertEquals("Impossibile modificare lo stato di un ordine già annullato.", ((Resp) resp.getBody()).getMessage());	 
 	}
+	
+	@Test
+    @Order(10)
+    public void getStoricoFiltratoSuccess() throws Exception {
+        // Test con filtro: ordini COMPLETATI degli ultimi 3 mesi
+        ResponseEntity<Resp> resp = ordineC.getStoricoFiltrato(1L, true, FiltroTemporale.ULTIMI_3_MESI);
+        
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+        assertNotNull(resp.getBody().getObj());
+        assertEquals("Ricerca effettuata con successo", resp.getBody().getMessage());
+        
+        log.info("Test getStoricoFiltratoSuccess completato");
+    }
+
+    @Test
+    @Order(11)
+    public void getStoricoFiltratoSenzaPeriodo() throws Exception {
+        // Test senza filtro temporale (periodo = null), deve restituire "TUTTO" per default
+        ResponseEntity<Resp> resp = ordineC.getStoricoFiltrato(1L, false, null);
+        
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+        assertNotNull(resp.getBody().getObj());
+        assertEquals("Ricerca effettuata con successo", resp.getBody().getMessage());
+        
+        log.info("Test getStoricoFiltratoSenzaPeriodo (default) completato");
+    }
+
+    @Test
+    @Order(12)
+    public void getStoricoFiltratoUtenteInesistente() throws Exception {
+        // Test con utente che non ha ordini o non esiste (dovrebbe restituire lista vuota, non errore)
+        ResponseEntity<Resp> resp = ordineC.getStoricoFiltrato(999L, true, FiltroTemporale.TUTTO);
+        
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+        List<?> lista = (List<?>) resp.getBody().getObj();
+        assertTrue(lista.isEmpty());
+        
+        log.info("Test getStoricoFiltratoUtenteInesistente completato");
+    }
 }

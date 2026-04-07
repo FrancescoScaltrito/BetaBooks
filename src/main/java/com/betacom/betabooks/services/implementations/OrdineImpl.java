@@ -1,6 +1,7 @@
 package com.betacom.betabooks.services.implementations;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -12,6 +13,7 @@ import com.betacom.betabooks.dto.inputs.OrdineReq;
 import com.betacom.betabooks.dto.outputs.CarrelloDTO;
 import com.betacom.betabooks.dto.outputs.CarrelloItemDTO;
 import com.betacom.betabooks.dto.outputs.OrdineDTO;
+import com.betacom.betabooks.enums.FiltroTemporale;
 import com.betacom.betabooks.enums.MetodoPagamento;
 import com.betacom.betabooks.enums.StatoOrdine;
 import com.betacom.betabooks.models.Carrello;
@@ -58,59 +60,21 @@ public class OrdineImpl implements IOrdineServices {
         	//carrello vuoto
             throw new Exception("Impossibile creare un ordine con il carrello vuoto");
         }
-
-        // creazione dell'ordine
-       
-        Ordine ordine = new Ordine();
         
         Utente utente = utenteRepo.findById(idUtente)
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
         Indirizzo indirizzo = indirizzoRepo.findById(idIndirizzo)
                 .orElseThrow(() -> new RuntimeException("Indirizzo non trovato"));
         
-        ordine.setUtente(utente); 
-        ordine.setIndirizzo(indirizzo);
-        ordine.setMetodoPagamento(metodo);
-        ordine.setTotale(carrelloDto.getPrezzoTotaleComplessivo());
-        ordine.setStato(StatoOrdine.IN_ATTESA);
-
+        // creazione dell'ordine
+        Ordine ordine = inizializzaOrdine(utente, indirizzo, metodo, carrelloDto.getPrezzoTotaleComplessivo());
+     
         // trasformiamo gli item del carrello in item dell'ordine 
         for (CarrelloItemDTO itemDto : carrelloDto.getItems()) {
         	
         	log.debug("Creazione di un ordineItem");
         	
-        	FormatoLibro formato = formatoRepo.findById(itemDto.getIdFormatoLibro())
-                    .orElseThrow(() -> new RuntimeException("Libro non trovato"));
-            
-        	
-        	if (Boolean.FALSE.equals(formato.getAttivo())) {
-        	    throw new Exception("Spiacenti, l'articolo '" + itemDto.getTitoloLibro() + "' non è più disponibile per la vendita.");
-        	}
-        	
-        	if (formato.getQuantita() != null) {
-        	    // è un libro fisico: eseguiamo l'Hard Check e il decremento 
-        		 // controlliamo se ci sono abbastanza copie in magazzino
-            	//se disponibilità=1 ci sono abbastanza copie e il db decrementa il numero di copie disponibili per il libro
-        	    int disponibilita = formatoRepo.decrementaSeDisponibile(itemDto.getIdFormatoLibro(), itemDto.getQuantita());
-        	    
-        	    if (disponibilita == 0) {
-        	        throw new Exception("Spiacenti, la disponibilità per '" + itemDto.getTitoloLibro() + "' non è sufficiente.");
-        	    }
-        	} else {
-        	    // è un ebook
-        	    log.info("Ebook: salto il decremento magazzino per {}", itemDto.getTitoloLibro());
-        	}
-        	
-
-            
-            OrdineItem ordineItem = new OrdineItem();
-            ordineItem.setOrdine(ordine);
-            ordineItem.setQuantita(itemDto.getQuantita());
-            ordineItem.setPrezzoUnitarioAcquisto(itemDto.getPrezzoUnitario());
-            
- 
-            ordineItem.setFormatoLibro(formato); 
-            ordine.getItems().add(ordineItem);
+        	processaSingoloItem(ordine, itemDto);
         }
 
         // salviamo l'ordine (a cascata salverà anche i relativi OrdineItem)
@@ -122,6 +86,50 @@ public class OrdineImpl implements IOrdineServices {
         log.info("Ordine {} creato con successo per l'utente {}", ordineSalvato.getId(), idUtente);
         
         return Mapper.buildOrdineDTO(ordineSalvato); 
+    }
+    
+    private Ordine inizializzaOrdine(Utente utente, Indirizzo indirizzo, MetodoPagamento metodo, BigDecimal totale) {
+        Ordine ordine = new Ordine();
+        ordine.setUtente(utente);
+        ordine.setIndirizzo(indirizzo);
+        ordine.setMetodoPagamento(metodo);
+        ordine.setTotale(totale);
+        ordine.setStato(StatoOrdine.IN_ATTESA);
+        return ordine;
+    }
+    
+    private void processaSingoloItem(Ordine ordine, CarrelloItemDTO itemDto) throws Exception {
+        FormatoLibro formato = formatoRepo.findById(itemDto.getIdFormatoLibro())
+                .orElseThrow(() -> new RuntimeException("Libro non trovato: " + itemDto.getTitoloLibro()));
+
+        // Validazione disponibilità generale
+        if (Boolean.FALSE.equals(formato.getAttivo())) {
+            throw new Exception("L'articolo '" + itemDto.getTitoloLibro() + "' non è più disponibile.");
+        }
+
+        // Gestione quantità (solo se fisico)
+        if (formato.getQuantita() != null) {
+            gestisciDecrementoMagazzino(itemDto);
+        }
+
+        // Creazione legame Ordine <-> Item
+        ordine.getItems().add(costruisciOrdineItem(ordine, itemDto, formato));
+    }
+
+    private void gestisciDecrementoMagazzino(CarrelloItemDTO itemDto) throws Exception {
+        int disponibilita = formatoRepo.decrementaSeDisponibile(itemDto.getIdFormatoLibro(), itemDto.getQuantita());
+        if (disponibilita == 0) {
+            throw new Exception("Disponibilità insufficiente per: " + itemDto.getTitoloLibro());
+        }
+    }
+
+    private OrdineItem costruisciOrdineItem(Ordine ordine, CarrelloItemDTO itemDto, FormatoLibro formato) {
+        OrdineItem ordineItem = new OrdineItem();
+        ordineItem.setOrdine(ordine);
+        ordineItem.setQuantita(itemDto.getQuantita());
+        ordineItem.setPrezzoUnitarioAcquisto(itemDto.getPrezzoUnitario());
+        ordineItem.setFormatoLibro(formato);
+        return ordineItem;
     }
     
     @Override
@@ -199,6 +207,27 @@ public class OrdineImpl implements IOrdineServices {
         ordineRepo.save(ordine);
         
         log.info("Stato ordine {} aggiornato a {}", idOrdine, nuovoStato);
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrdineDTO> getOrdiniFiltrati(Long idUtente, boolean completati, FiltroTemporale filtro) {
+        // Se il filtro è null (non inviato), di default mostriamo tutto
+        FiltroTemporale filtroEffettivo = (filtro != null) ? filtro : FiltroTemporale.TUTTO;
+        
+        LocalDateTime dataSoglia = filtroEffettivo.getDataInizio();
+        StatoOrdine statoRiferimento = StatoOrdine.CONSEGNATO;
+        
+        List<Ordine> ordini;
+        if (completati) {
+            ordini = ordineRepo.findByUtenteIdAndStatoAndDataOrdineAfterOrderByDataOrdineDesc(
+                    idUtente, statoRiferimento, dataSoglia);
+        } else {
+            ordini = ordineRepo.findByUtenteIdAndStatoNotAndDataOrdineAfterOrderByDataOrdineDesc(
+                    idUtente, statoRiferimento, dataSoglia);
+        }
+        
+        return Mapper.buildOrdineDTO(ordini);
     }
 }
 

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.betacom.betabooks.models.AuditLog;
 
+
 public interface IAuditLogRepository extends JpaRepository<AuditLog, Long> {
 
     List<AuditLog> OrderByDataModificaDesc();

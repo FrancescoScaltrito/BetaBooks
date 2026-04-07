@@ -26,16 +26,15 @@ public class UtenteImpl implements IUtenteServices {
 	private final IUtenteRepository utenteRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final JwtUtil jwtUtil;
+
 
     public UtenteImpl(IUtenteRepository utenteRepository, 
                       PasswordEncoder passwordEncoder,
-                      AuthenticationManager authenticationManager,
-                      JwtUtil jwtUtil) {
+                      AuthenticationManager authenticationManager) {
         this.utenteRepository = utenteRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
-        this.jwtUtil = jwtUtil;
+
     }
 
     @Override
@@ -101,22 +100,18 @@ public class UtenteImpl implements IUtenteServices {
     @Override
     public Map<String, Object> login(UtenteReq req) {
         // 1. Autentica l'utente (Spring controlla email e password)
+        // Se le credenziali sono sbagliate, lancia AuthenticationException qui
         Authentication auth = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword())
         );
 
-        // 2. Se l'autenticazione fallisce, Spring lancia un'eccezione qui sopra.
-        // Se continua, recuperiamo l'utente dal DB
+        // 2. Recuperiamo l'utente dal DB
         Utente utente = utenteRepository.findByEmail(req.getEmail())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utente non trovato"));
 
-        // 3. Generiamo il Token
-        String token = jwtUtil.generateToken(utente.getEmail(), utente.getRuolo().name());
-
-        // 4. Prepariamo la risposta per il Controller (e per Angular)
+        // 3. Prepariamo la risposta (Senza Token!)
         Map<String, Object> response = new HashMap<>();
-        response.put("token", token);
-        response.put("utente", toDTO(utente)); // Usiamo il DTO per non mandare la password al front-end!
+        response.put("utente", toDTO(utente)); 
 
         return response;
     }
