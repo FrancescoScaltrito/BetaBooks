@@ -54,9 +54,8 @@ public class CarrelloController {
 
 
     @GetMapping("/utente/{idUtente}")
-    public ResponseEntity<?> getCarrello(@PathVariable Long idUtente, Principal principal) {
+    public ResponseEntity<?> getCarrello(@PathVariable Long idUtente) {
         log.debug("CarrelloController - visualizzazione carrello dell'utente: {}", idUtente);
-        System.out.println("Utente che sta chiamando: " + (principal != null ? principal.getName() : "ANONIMO"));
         
         try {
             // Se tutto va bene, restituisco direttamente il DTO

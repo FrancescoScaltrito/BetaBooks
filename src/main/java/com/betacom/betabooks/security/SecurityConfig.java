@@ -71,23 +71,26 @@ public class SecurityConfig {
             // Non usiamo il Bean esterno, lasciamo che il manager faccia il suo lavoro
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-            	    // 1. TUTTO CIÒ CHE È PUBBLICO (Senza login)
-            		.requestMatchers(HttpMethod.GET, "/uploads/**").permitAll() // DEVE ESSERE LA PRIMA RIGA
+            	    // PUBBLICO
+            	    .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
             	    .requestMatchers(HttpMethod.GET, "/api/libro/**").permitAll()
-            	    .requestMatchers("/api/auth/**", "/api/utenti/register").permitAll()
+            	    .requestMatchers("/api/utenti/register").permitAll()
+            	    .requestMatchers("/api/auth/login").permitAll()
             	    .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
-            	    .requestMatchers("/api/recensione/**").permitAll()
+
+            	    // AUTH (serve login)
             	    .requestMatchers("/api/auth/me").authenticated()
             	    .requestMatchers("/api/carrello/**").authenticated()
             	    .requestMatchers("/api/ordine/**").authenticated()
-            	    .requestMatchers("/api/profili/**").authenticated() 
+            	    .requestMatchers("/api/profili/**").authenticated()
             	    .requestMatchers("/api/indirizzi/**").authenticated()
 
-            	    // 2. CIÒ CHE È SOLO PER ADMIN
-            	    // Nota: metti le regole ADMIN PRIMA di anyRequest().authenticated()
-            	    .requestMatchers("/api/libro/**").hasRole("ADMIN")
-            	    
-            	    // 3. TUTTO IL RESTO (Richiede login generico)
+            	    // ADMIN
+            	    .requestMatchers(HttpMethod.POST, "/api/libro/**").hasRole("ADMIN")
+            	    .requestMatchers(HttpMethod.PUT, "/api/libro/**").hasRole("ADMIN")
+            	    .requestMatchers(HttpMethod.DELETE, "/api/libro/**").hasRole("ADMIN")
+
+            	    // resto
             	    .anyRequest().authenticated()
             	).httpBasic(basic -> basic.authenticationEntryPoint((request, response, authException) -> {
             	    // Invia 401 ma SENZA l'header che scatena il pop-up nel browser
@@ -109,34 +112,6 @@ public class SecurityConfig {
         return http.build();
     }
     
-
-    
-    /*
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(sm -> sm
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .httpBasic(basic -> basic.realmName("BetaBooks API"))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.POST,
-                    "/api/utenti/register",
-                    "/api/utenti/register/",
-                    "/api/ "
-                ).permitAll()
-                .requestMatchers(
-                    "/swagger-ui/**",
-                    "/swagger-ui.html",
-                    "/v3/api-docs/**"
-                ).permitAll()
-                .requestMatchers("/api/utenti/**").authenticated()
-                .anyRequest().authenticated()
-            )
-            .userDetailsService(userDetailsService);
-
-        return http.build();
-    }*/
     
 
 }

@@ -23,7 +23,7 @@ public class FormatoLibroMapper {
 
     public  FormatoLibroDTO buildFormatoLibroDTO(FormatoLibro f) {
         return FormatoLibroDTO.builder()
-        		.copertina(upS.buildUrl(f.getCopertina()))
+        		.copertina( (f.getCopertina() == null)  ? null :  upS.buildUrl(f.getCopertina()))
                 .id(f.getId())
                 .tipoSupporto(f.getTipoSupporto())
                 .tipoCopertina(f.getTipoCopertina())

@@ -1,28 +1,35 @@
-package com.betacom.betabooks.models; // Adatta il pacchetto se necessario
+package com.betacom.betabooks.models;
 
-import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes; // <--- Questo è l'import corretto
 import java.time.LocalDateTime;
 import java.util.Map;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter 
+@Setter 
 @Entity
 @Table(name = "audit_log")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class AuditLog {
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_audit")
     private Long id;
 
-    @Column(name = "nome_tabella", nullable = false)
+    @Column(name = "nome_tabella", nullable = false, length = 50)
     private String nomeTabella;
 
-    @Column(name = "tipo_operazione", nullable = false)
+    @Column(name = "tipo_operazione", nullable = false, length = 10)
     private String tipoOperazione;
 
     @Column(name = "id_modificato", nullable = false)
@@ -36,16 +43,9 @@ public class AuditLog {
     @Column(name = "valori_nuovi", columnDefinition = "jsonb")
     private Map<String, Object> valoriNuovi;
 
-    @Column(name = "utente_db")
+    @Column(name = "utente_db", length = 50)
     private String utenteDb;
 
-    @Column(name = "data_modifica", nullable = false)
+    @Column(name = "data_modifica")
     private LocalDateTime dataModifica;
-
-    @PrePersist
-    protected void onCreate() {
-        if (this.dataModifica == null) {
-            this.dataModifica = LocalDateTime.now();
-        }
-    }
 }

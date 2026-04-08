@@ -4,7 +4,6 @@ import com.betacom.betabooks.dto.inputs.UtenteReq;
 import com.betacom.betabooks.dto.outputs.UtenteDTO;
 import com.betacom.betabooks.models.Utente;
 import com.betacom.betabooks.repositories.IUtenteRepository;
-import com.betacom.betabooks.security.JwtUtil;
 import com.betacom.betabooks.services.interfaces.IUtenteServices;
 
 import org.springframework.http.HttpStatus;

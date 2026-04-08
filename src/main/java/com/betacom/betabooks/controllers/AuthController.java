@@ -28,7 +28,7 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final IUtenteRepository utenteRepository;
-    
+    /*
     @GetMapping("/me")
     public ResponseEntity<UtenteDTO> getMe(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -47,8 +47,8 @@ public class AuthController {
                 .build();
 
         return ResponseEntity.ok(dto);
-    }
-
+    }*/
+/*
     @PostMapping("/login")
     public ResponseEntity<UtenteDTO> login(@RequestBody UtenteReq req) {
     	
@@ -80,11 +80,33 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }*/
+        }*/  /*
         catch (AuthenticationException e) {
             System.out.println("--- ERRORE AUTENTICAZIONE: " + e.getMessage());
             e.printStackTrace(); // <--- QUESTO CI DICE TUTTO
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+    }
+    */
+    
+    @GetMapping("/me")
+    public ResponseEntity<UtenteDTO> getMe(Authentication authentication) {
+
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        System.out.println("USER: " + authentication.getName());
+
+        Utente utente = utenteRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+
+        return ResponseEntity.ok(
+            UtenteDTO.builder()
+                .id(utente.getId())
+                .email(utente.getEmail())
+                .ruolo(utente.getRuolo().name())
+                .build()
+        );
     }
 }
