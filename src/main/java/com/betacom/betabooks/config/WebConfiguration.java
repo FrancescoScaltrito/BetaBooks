@@ -22,7 +22,7 @@ public class WebConfiguration implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // Permette di accedere alle immagini via URL senza filtri di sicurezza
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:uploads/")
-                .setCachePeriod(0); // Forza il browser a non usare la cache
+                .addResourceLocations("file:uploads/");
+                //.setCachePeriod(0); // Forza il browser a non usare la cache
     }
 }

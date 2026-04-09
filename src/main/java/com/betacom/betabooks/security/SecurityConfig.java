@@ -35,7 +35,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // CONFIGURAZIONE DIRETTA DELL'AUTHENTICATION MANAGER
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder = 
@@ -48,13 +47,6 @@ public class SecurityConfig {
         return authenticationManagerBuilder.build();
     }
     
-    /*
-         @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
-     */
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -112,6 +104,4 @@ public class SecurityConfig {
         return http.build();
     }
     
-    
-
 }

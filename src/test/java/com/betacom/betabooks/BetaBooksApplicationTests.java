@@ -8,12 +8,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.betacom.betabooks.carrello.CarrelloControllerTest;
 import com.betacom.betabooks.libro.LibroControllerTest;
 import com.betacom.betabooks.ordine.OrdineControllerTest;
+import com.betacom.betabooks.recensione.RecensioneControllerTest;
 
 @Suite
 @SelectClasses ({
 	CarrelloControllerTest.class,
 	OrdineControllerTest.class,
-	LibroControllerTest.class
+	LibroControllerTest.class,
+	RecensioneControllerTest.class
 })
 @SpringBootTest
 class BetaBooksApplicationTests {

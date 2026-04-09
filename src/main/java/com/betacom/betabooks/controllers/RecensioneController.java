@@ -67,6 +67,7 @@ public class RecensioneController {
         HttpStatus status = HttpStatus.OK;
         try {
             recensioneS.delete(id);
+            response.setMessage("RecensioneController - Recensione eliminata");
         } catch (Exception e) {
             log.error("ERRORE RecensioneController - " + e.getMessage());
             response.setMessage(e.getMessage());
