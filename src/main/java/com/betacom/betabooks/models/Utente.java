@@ -36,6 +36,9 @@ public class Utente {
     @Column(name = "password", nullable = false)
     private String password;
     
+    @Column(name = "validato", nullable = false)
+    private Boolean validato;
+    
     @Enumerated(EnumType.STRING)
     @Column(name = "ruolo")
     private RuoloUtente ruolo = RuoloUtente.USER;
