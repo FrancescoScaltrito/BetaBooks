@@ -10,12 +10,14 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 
 import com.betacom.betabooks.dto.inputs.OrdineReq;
+import com.betacom.betabooks.dto.outputs.AutoreDTO;
 import com.betacom.betabooks.dto.outputs.CarrelloDTO;
 import com.betacom.betabooks.dto.outputs.CarrelloItemDTO;
 import com.betacom.betabooks.dto.outputs.OrdineDTO;
 import com.betacom.betabooks.enums.FiltroTemporale;
 import com.betacom.betabooks.enums.MetodoPagamento;
 import com.betacom.betabooks.enums.StatoOrdine;
+import com.betacom.betabooks.models.Autore;
 import com.betacom.betabooks.models.Carrello;
 import com.betacom.betabooks.models.CarrelloItem;
 import com.betacom.betabooks.models.FormatoLibro;
@@ -229,6 +231,16 @@ public class OrdineImpl implements IOrdineServices {
         
         return Mapper.buildOrdineDTO(ordini);
     }
+    
+    
+	@Transactional(rollbackFor = Exception.class)
+	@Override
+	public List<OrdineDTO> findAll() throws Exception {
+		log.debug("AutoreImpl - findAll");
+		List<Ordine> ordini = ordineRepo.findAll();
+		return Mapper.buildOrdineDTO(ordini);
+	}
+
 }
 
 
