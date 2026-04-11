@@ -14,4 +14,5 @@ public class UtenteReq {
     private String email;
     private String password;
     private String ruolo;
+    private Boolean validato;
 }

@@ -209,6 +209,15 @@ public class LibroImpl implements ILibroServices {
 		formato.setAttivo(false);
 		formatoR.save(formato);
 	}
+	
+	@Transactional(rollbackFor = Exception.class)
+	@Override
+	public void eliminaFormato(Long idFormato) throws Exception {
+		log.debug("LibroImpl - eliminaFormato {}", idFormato);
+		FormatoLibro formato = formatoR.findById(idFormato).orElseThrow(() -> new Exception("Formato non trovato"));
+		formato.setAttivo(false);
+		formatoR.delete(formato);
+	}
 
 	@Override
 	public List<FormatoLibroDTO> findFormatiByLibro(Long idLibro) throws Exception {

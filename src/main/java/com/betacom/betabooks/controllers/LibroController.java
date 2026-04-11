@@ -4,6 +4,7 @@ package com.betacom.betabooks.controllers;
 
 import org.springframework.http.MediaType;
 
+
 import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -176,6 +177,22 @@ public class LibroController {
 		try {
 			libroS.disattivaFormato(id);
 			response.setMessage("LibroController - Formato disattivato");
+		} catch (Exception e) {
+			log.error("ERRORE LibroController - " + e.getMessage());
+			response.setMessage(e.getMessage());
+			status = HttpStatus.BAD_REQUEST;
+		}
+		return ResponseEntity.status(status).body(response);
+	}
+	
+	@DeleteMapping("/formato/elimina/{id}")
+	public ResponseEntity<Resp> eliminaFormato(@PathVariable Long id) {
+		log.debug("LibroController - eliminaFormato {}", id);
+		Resp response = new Resp();
+		HttpStatus status = HttpStatus.OK;
+		try {
+			libroS.eliminaFormato(id);
+			response.setMessage("LibroController - Formato eliminato");
 		} catch (Exception e) {
 			log.error("ERRORE LibroController - " + e.getMessage());
 			response.setMessage(e.getMessage());

@@ -70,6 +70,9 @@ public class SecurityConfig {
             	    .requestMatchers("/api/auth/login").permitAll()
             	    .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
 
+            	    .requestMatchers("/api/utenti/sendValidation","/api/utenti/emailValidate").permitAll()
+            	    .requestMatchers("/api/utenti/request-password-recovery","/api/utenti/confirm-password-recovery").permitAll()
+
             	    // AUTH (serve login)
             	    .requestMatchers("/api/auth/me").authenticated()
             	    .requestMatchers("/api/carrello/**").authenticated()

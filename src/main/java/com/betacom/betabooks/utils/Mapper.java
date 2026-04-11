@@ -1,7 +1,9 @@
 package com.betacom.betabooks.utils;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
@@ -247,6 +249,7 @@ public class Mapper {
     /*
      * AUDIT LOG
      */
+    /*
     public static AuditLogDTO buildAuditLogDTO(AuditLog a) {
         return AuditLogDTO.builder()
                 .id(a.getId())
@@ -255,6 +258,30 @@ public class Mapper {
                 .idModificato(a.getIdModificato())
                 .valoriPrecedenti(a.getValoriPrecedenti())
                 .valoriNuovi(a.getValoriNuovi())
+                .utenteDb(a.getUtenteDb())
+                .dataModifica(a.getDataModifica())
+                .build();
+    }*/
+    
+    //nuovo metodo per non far visualizzare le password all'admin lato frontend
+    public static AuditLogDTO buildAuditLogDTO(AuditLog a) {
+        // clono le mappe per non modificare l'entità originale nel DB
+        Map<String, Object> prev = a.getValoriPrecedenti() != null ? new HashMap<>(a.getValoriPrecedenti()) : null;
+        Map<String, Object> next = a.getValoriNuovi() != null ? new HashMap<>(a.getValoriNuovi()) : null;
+
+        // Se è la tabella "utenti", nascondiamo la password
+        if ("utenti".equalsIgnoreCase(a.getNomeTabella())) {
+            if (prev != null) prev.remove("password");
+            if (next != null) next.remove("password");
+        }
+
+        return AuditLogDTO.builder()
+                .id(a.getId())
+                .nomeTabella(a.getNomeTabella())
+                .tipoOperazione(a.getTipoOperazione())
+                .idModificato(a.getIdModificato())
+                .valoriPrecedenti(prev)
+                .valoriNuovi(next)
                 .utenteDb(a.getUtenteDb())
                 .dataModifica(a.getDataModifica())
                 .build();

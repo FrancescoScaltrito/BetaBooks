@@ -22,6 +22,7 @@ public interface ILibroServices {
 
     void updateFormato(FormatoLibroReq req) throws Exception;
     void disattivaFormato(Long idFormato) throws Exception;
+    void eliminaFormato(Long idFormato) throws Exception;
     List<FormatoLibroDTO> findFormatiByLibro(Long idLibro) throws Exception;
     FormatoLibroDTO findFormatoById(Long idFormato) throws Exception;
 
