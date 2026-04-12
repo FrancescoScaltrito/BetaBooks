@@ -133,6 +133,7 @@ public class Mapper {
     /*
      * CARRELLO ITEM
      */
+    /*
     public static CarrelloItemDTO buildCarrelloItemDTO(CarrelloItem item) {
         BigDecimal prezzoStorico = item.getPrezzoUnitario();
         BigDecimal subTotale = prezzoStorico.multiply(new BigDecimal(item.getQuantita()));
@@ -141,6 +142,28 @@ public class Mapper {
                 .id(item.getId())
                 .idFormatoLibro(item.getFormatoLibro().getId())
                 .titoloLibro(item.getFormatoLibro().getLibro().getTitolo())
+                .prezzoUnitario(prezzoStorico)
+                .quantita(item.getQuantita())
+                .prezzoTotaleRiga(subTotale)
+                .build();
+    }*/
+    
+    public static CarrelloItemDTO buildCarrelloItemDTO(CarrelloItem item) {
+        BigDecimal prezzoStorico = item.getPrezzoUnitario();
+        BigDecimal subTotale = prezzoStorico.multiply(new BigDecimal(item.getQuantita()));
+        
+        // Recuperiamo il libro e le relazioni necessarie
+        Libro libro = item.getFormatoLibro().getLibro();
+
+        return CarrelloItemDTO.builder()
+                .id(item.getId())
+                .idFormatoLibro(item.getFormatoLibro().getId())
+                .titoloLibro(libro.getTitolo())
+                // aggiunte per visualizzare i dati del libro nel carrello
+                .autoreNome(libro.getAutore().getNome())
+                .autoreCognome(libro.getAutore().getCognome())
+                .editoreNome(libro.getEditore().getNome())
+                .copertina(item.getFormatoLibro().getCopertina()) // Assicurati che nel modello Libro ci sia il percorso dell'immagine
                 .prezzoUnitario(prezzoStorico)
                 .quantita(item.getQuantita())
                 .prezzoTotaleRiga(subTotale)
