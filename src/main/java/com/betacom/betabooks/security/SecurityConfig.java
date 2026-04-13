@@ -79,6 +79,7 @@ public class SecurityConfig {
             	    .requestMatchers("/api/ordine/**").authenticated()
             	    .requestMatchers("/api/profili/**").authenticated()
             	    .requestMatchers("/api/indirizzi/**").authenticated()
+            	    .requestMatchers("/api/wishlist/**").authenticated()
 
             	    // ADMIN
             	    .requestMatchers(HttpMethod.POST, "/api/libro/**").hasRole("ADMIN")

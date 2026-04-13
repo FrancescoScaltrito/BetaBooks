@@ -95,13 +95,13 @@ public class WishlistController {
 
     // Sposta un elemento dalla wishlist al carrello
     @PostMapping("/{idWishlist}/sposta-carrello")
-    public ResponseEntity<Void> spostaNelCarrello(@PathVariable Long idWishlist) {
+    public ResponseEntity<String> spostaNelCarrello(@PathVariable Long idWishlist) {
         try {
             wishlistService.spostaNelCarrello(idWishlist);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             log.error("Errore spostaNelCarrello: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 }

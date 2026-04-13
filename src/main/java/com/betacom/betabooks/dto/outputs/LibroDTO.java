@@ -19,4 +19,5 @@ public class LibroDTO {
     private EditoreDTO editore;
     private List<CategoriaDTO> categorie;
     private List<FormatoLibroDTO> formati;
+    
 }

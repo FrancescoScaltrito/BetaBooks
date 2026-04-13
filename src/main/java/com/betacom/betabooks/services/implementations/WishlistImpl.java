@@ -8,8 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.betabooks.dto.inputs.CarrelloReq;
 import com.betacom.betabooks.dto.outputs.WishlistDTO;
+import com.betacom.betabooks.dto.outputs.AutoreDTO;
+import com.betacom.betabooks.dto.outputs.EditoreDTO;
 import com.betacom.betabooks.dto.outputs.LibroDTO;
 import com.betacom.betabooks.models.FormatoLibro;
+import com.betacom.betabooks.models.Libro;
 import com.betacom.betabooks.models.Utente;
 import com.betacom.betabooks.models.Wishlist;
 import com.betacom.betabooks.repositories.IFormatoLibroRepository;
@@ -64,6 +67,7 @@ public class WishlistImpl implements IWishlistServices {
         wishlistR.findByUtenteIdAndFormatoLibroId(userId, formatId)
             .ifPresent(wishlistR::delete);*/
         wishlistR.deleteByUtenteIdAndFormatoLibroId(userId, formatId);
+ 
     }
 
     @Transactional(readOnly = true)
@@ -113,15 +117,29 @@ public class WishlistImpl implements IWishlistServices {
     
     private WishlistDTO toDTO(Wishlist w) {
         FormatoLibro formato = w.getFormatoLibro();
+        Libro libro = formato.getLibro();
 
+        // 1. Mappa l'autore come oggetto
+        AutoreDTO autore = (libro.getAutore() != null) 
+            ? new AutoreDTO(libro.getAutore().getId(), libro.getAutore().getNome(), libro.getAutore().getCognome(), null, null) 
+            : null;
+
+        // 2. Mappa l'editore come oggetto
+        EditoreDTO editore = (libro.getEditore() != null) 
+            ? new EditoreDTO(libro.getEditore().getId(), libro.getEditore().getNome(), null) 
+            : null;
+
+        // 3. Costruisci il LibroDTO usando gli oggetti
         LibroDTO libroDTO = LibroDTO.builder()
-                .id(formato.getLibro().getId())
-                .titolo(formato.getLibro().getTitolo())
-                .descrizione(formato.getLibro().getDescrizione())
+                .id(libro.getId())
+                .titolo(libro.getTitolo())
+                .autore(autore)
+                .editore(editore)
                 .build();
 
         return WishlistDTO.builder()
                 .id(w.getId())
+                .formatId(formato.getId())
                 .libro(libroDTO)
                 .build();
     }
