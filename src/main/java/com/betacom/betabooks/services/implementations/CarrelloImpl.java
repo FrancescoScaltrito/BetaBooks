@@ -259,7 +259,7 @@ public class CarrelloImpl implements ICarrelloServices {
         Utente utente = item.getCarrello().getUtente();
         FormatoLibro formato = item.getFormatoLibro();
 
-        Optional<Wishlist> giaPresente = wishlistRepo.findByUtenteIdAndFormatoLibro_Id(utente.getId(), formato.getId());
+        Optional<Wishlist> giaPresente = wishlistRepo.findByUtenteIdAndFormatoLibroId(utente.getId(), formato.getId());
 
         if (giaPresente.isEmpty()) {
             log.info("Libro non presente in wishlist");

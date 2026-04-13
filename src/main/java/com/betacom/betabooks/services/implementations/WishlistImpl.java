@@ -39,7 +39,7 @@ public class WishlistImpl implements IWishlistServices {
         if (userId == null) throw new Exception("Id utente non può essere null");
         if (formatId == null) throw new Exception("Id formato non può essere null");
 
-        if (wishlistR.findByUtenteIdAndFormatoLibro_Id(userId, formatId).isPresent()) {
+        if (wishlistR.findByUtenteIdAndFormatoLibroId(userId, formatId).isPresent()) {
             throw new Exception("Elemento già presente nella wishlist");
         }
 
@@ -60,16 +60,17 @@ public class WishlistImpl implements IWishlistServices {
         log.debug("WishlistImpl - removeFromWishlist userId: {}, formatId: {}", userId, formatId);
 
         if (userId == null || formatId == null) return;
-
-        wishlistR.findByUtenteIdAndFormatoLibro_Id(userId, formatId)
-            .ifPresent(wishlistR::delete);
+/*
+        wishlistR.findByUtenteIdAndFormatoLibroId(userId, formatId)
+            .ifPresent(wishlistR::delete);*/
+        wishlistR.deleteByUtenteIdAndFormatoLibroId(userId, formatId);
     }
 
     @Transactional(readOnly = true)
     @Override
     public boolean isInWishlist(Long userId, Long formatId) throws Exception {
         if (userId == null || formatId == null) return false;
-        return wishlistR.findByUtenteIdAndFormatoLibro_Id(userId, formatId).isPresent();
+        return wishlistR.findByUtenteIdAndFormatoLibroId(userId, formatId).isPresent();
     }
 
     @Override
