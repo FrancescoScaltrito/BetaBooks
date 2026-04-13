@@ -37,6 +37,7 @@ public class EditoreImpl implements IEditoreServices{
 		Editore editore = new Editore();
 		editore.setNome(req.getNome());
 		editore.setDescrizione(req.getDescrizione());
+		editore.setAttivo(req.isAttivo());
 		
 		return editoreR.save(editore).getId();
 	}
@@ -50,6 +51,7 @@ public class EditoreImpl implements IEditoreServices{
 			editore.setNome(req.getNome());
 		if(req.getDescrizione()!=null)
 			editore.setDescrizione(req.getDescrizione());
+		editore.setAttivo(req.isAttivo());
 		editoreR.save(editore);
 		
 	}
@@ -77,6 +79,15 @@ public class EditoreImpl implements IEditoreServices{
 		log.debug("EditoreImpl - findAll");
 		List<Editore> editore = editoreR.findAll();
 		return Mapper.buildEditoreDTO(editore);
+	}
+
+	@Override
+	public void disattiva(Long id) throws Exception {
+		log.debug("EditoreImpl - disattiva {}",id);
+		Editore e = editoreR.findById(id).orElseThrow( () -> new Exception("ERRORE disattiva - Editore non trovato in DB"));
+		e.setAttivo(false);
+		editoreR.save(e);
+		
 	}
 
 }

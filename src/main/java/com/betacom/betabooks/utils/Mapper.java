@@ -1,7 +1,9 @@
 package com.betacom.betabooks.utils;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
@@ -55,6 +57,7 @@ public class Mapper {
                 .nome(a.getNome())
                 .cognome(a.getCognome())
                 .nazionalita(a.getNazionalita())
+                .attivo(a.isAttivo())
                 .build();
     }
 
@@ -73,6 +76,7 @@ public class Mapper {
         		.id(e.getId())
                 .descrizione(e.getDescrizione())
                 .nome(e.getNome())
+                .attivo(e.isAttivo())
                 .build();
     }
 
@@ -91,6 +95,7 @@ public class Mapper {
         		.id(c.getId())
                 .descrizione(c.getDescrizione())
                 .nome(c.getNome())
+                .attivo(c.isAttivo())
                 .build();
     }
 
@@ -131,6 +136,7 @@ public class Mapper {
     /*
      * CARRELLO ITEM
      */
+    /*
     public static CarrelloItemDTO buildCarrelloItemDTO(CarrelloItem item) {
         BigDecimal prezzoStorico = item.getPrezzoUnitario();
         BigDecimal subTotale = prezzoStorico.multiply(new BigDecimal(item.getQuantita()));
@@ -139,6 +145,28 @@ public class Mapper {
                 .id(item.getId())
                 .idFormatoLibro(item.getFormatoLibro().getId())
                 .titoloLibro(item.getFormatoLibro().getLibro().getTitolo())
+                .prezzoUnitario(prezzoStorico)
+                .quantita(item.getQuantita())
+                .prezzoTotaleRiga(subTotale)
+                .build();
+    }*/
+    
+    public static CarrelloItemDTO buildCarrelloItemDTO(CarrelloItem item) {
+        BigDecimal prezzoStorico = item.getPrezzoUnitario();
+        BigDecimal subTotale = prezzoStorico.multiply(new BigDecimal(item.getQuantita()));
+        
+        // Recuperiamo il libro e le relazioni necessarie
+        Libro libro = item.getFormatoLibro().getLibro();
+
+        return CarrelloItemDTO.builder()
+                .id(item.getId())
+                .idFormatoLibro(item.getFormatoLibro().getId())
+                .titoloLibro(libro.getTitolo())
+                // aggiunte per visualizzare i dati del libro nel carrello
+                .autoreNome(libro.getAutore().getNome())
+                .autoreCognome(libro.getAutore().getCognome())
+                .editoreNome(libro.getEditore().getNome())
+                .copertina(item.getFormatoLibro().getCopertina()) // Assicurati che nel modello Libro ci sia il percorso dell'immagine
                 .prezzoUnitario(prezzoStorico)
                 .quantita(item.getQuantita())
                 .prezzoTotaleRiga(subTotale)
@@ -247,6 +275,7 @@ public class Mapper {
     /*
      * AUDIT LOG
      */
+    /*
     public static AuditLogDTO buildAuditLogDTO(AuditLog a) {
         return AuditLogDTO.builder()
                 .id(a.getId())
@@ -255,6 +284,30 @@ public class Mapper {
                 .idModificato(a.getIdModificato())
                 .valoriPrecedenti(a.getValoriPrecedenti())
                 .valoriNuovi(a.getValoriNuovi())
+                .utenteDb(a.getUtenteDb())
+                .dataModifica(a.getDataModifica())
+                .build();
+    }*/
+    
+    //nuovo metodo per non far visualizzare le password all'admin lato frontend
+    public static AuditLogDTO buildAuditLogDTO(AuditLog a) {
+        // clono le mappe per non modificare l'entità originale nel DB
+        Map<String, Object> prev = a.getValoriPrecedenti() != null ? new HashMap<>(a.getValoriPrecedenti()) : null;
+        Map<String, Object> next = a.getValoriNuovi() != null ? new HashMap<>(a.getValoriNuovi()) : null;
+
+        // Se è la tabella "utenti", nascondiamo la password
+        if ("utenti".equalsIgnoreCase(a.getNomeTabella())) {
+            if (prev != null) prev.remove("password");
+            if (next != null) next.remove("password");
+        }
+
+        return AuditLogDTO.builder()
+                .id(a.getId())
+                .nomeTabella(a.getNomeTabella())
+                .tipoOperazione(a.getTipoOperazione())
+                .idModificato(a.getIdModificato())
+                .valoriPrecedenti(prev)
+                .valoriNuovi(next)
                 .utenteDb(a.getUtenteDb())
                 .dataModifica(a.getDataModifica())
                 .build();

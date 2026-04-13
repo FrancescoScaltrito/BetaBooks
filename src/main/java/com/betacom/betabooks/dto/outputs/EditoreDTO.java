@@ -13,4 +13,5 @@ public class EditoreDTO {
     private Long id;
     private String nome;
     private String descrizione;
+    private boolean attivo;
 }

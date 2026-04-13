@@ -106,6 +106,7 @@ public class AuthController {
                 .id(utente.getId())
                 .email(utente.getEmail())
                 .ruolo(utente.getRuolo().name())
+                .validato(utente.getValidato())
                 .build()
         );
     }

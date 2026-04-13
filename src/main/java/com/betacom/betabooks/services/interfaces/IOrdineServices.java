@@ -21,5 +21,7 @@ public interface IOrdineServices {
 
 	 List<OrdineDTO> getOrdiniFiltrati(Long idUtente, boolean completati, FiltroTemporale filtro);
 
+	 List<OrdineDTO> findAll() throws Exception;
+
 
 }

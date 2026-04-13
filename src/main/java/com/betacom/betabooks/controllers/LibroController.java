@@ -4,6 +4,7 @@ package com.betacom.betabooks.controllers;
 
 import org.springframework.http.MediaType;
 
+
 import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -50,22 +51,6 @@ public class LibroController {
 
 	// METODO OBSOLETO, LO LASCIO NON SI SA MAI
 
-    @PostMapping("/create")
-    public ResponseEntity<Resp> create(@RequestBody(required = true) LibroReq req) {
-        log.debug("LibroController - create {}", req);
-        Resp response = new Resp();
-        HttpStatus status = HttpStatus.OK;
-        try {
-            libroS.create(req);
-            response.setMessage("LibroController - Libro creato");
-        } catch (Exception e) {
-            log.error("ERRORE LibroController - " + e.getMessage());
-            response.setMessage(e.getMessage());
-            status = HttpStatus.BAD_REQUEST;
-        }
-        return ResponseEntity.status(status).body(response);
-    }
-		
 
 	@PutMapping("/update")
 	public ResponseEntity<Resp> update(@RequestBody(required = true) LibroReq req) {
@@ -199,6 +184,22 @@ public class LibroController {
 		}
 		return ResponseEntity.status(status).body(response);
 	}
+	
+	@DeleteMapping("/formato/elimina/{id}")
+	public ResponseEntity<Resp> eliminaFormato(@PathVariable Long id) {
+		log.debug("LibroController - eliminaFormato {}", id);
+		Resp response = new Resp();
+		HttpStatus status = HttpStatus.OK;
+		try {
+			libroS.eliminaFormato(id);
+			response.setMessage("LibroController - Formato eliminato");
+		} catch (Exception e) {
+			log.error("ERRORE LibroController - " + e.getMessage());
+			response.setMessage(e.getMessage());
+			status = HttpStatus.BAD_REQUEST;
+		}
+		return ResponseEntity.status(status).body(response);
+	}
 
 	/*
 	 * Restituisce tutti i formati attivi di un libro
@@ -299,5 +300,21 @@ public class LibroController {
 		return ResponseEntity.status(status).body(response);
 	}
 	
+	@PostMapping("/create")
+    public ResponseEntity<Resp> create(@RequestBody(required = true) LibroReq req) {
+        log.debug("LibroController - create {}", req);
+        Resp response = new Resp();
+        HttpStatus status = HttpStatus.OK;
+        try {
+        	Object idNuovoLibro = libroS.create(req);
+			response.setMessage("LibroController - Libro creato");
+			response.setObj(idNuovoLibro);
+        } catch (Exception e) {
+            log.error("ERRORE LibroController - " + e.getMessage());
+            response.setMessage(e.getMessage());
+            status = HttpStatus.BAD_REQUEST;
+        }
+        return ResponseEntity.status(status).body(response);
+    }
 }
 	

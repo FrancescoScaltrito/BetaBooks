@@ -15,4 +15,5 @@ public class AutoreDTO {
     private String cognome;
     private String nazionalita;
     private String biografia;
+    private boolean attivo;
 }

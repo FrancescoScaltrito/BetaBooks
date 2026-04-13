@@ -11,4 +11,6 @@ public interface IAutoreServices {
 	void delete(Long id) throws Exception;
 	AutoreDTO findById(Long id) throws Exception;
 	List<AutoreDTO> findAll() throws Exception;
+	
+	void disattiva(Long id) throws Exception;
 }

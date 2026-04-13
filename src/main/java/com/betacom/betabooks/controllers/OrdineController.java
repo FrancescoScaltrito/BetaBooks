@@ -146,4 +146,19 @@ public class OrdineController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(r);
         }
     }
+    
+    
+	@GetMapping("/getAll")
+	public ResponseEntity<Object> list(){
+		Object response = new Object();
+		HttpStatus status = HttpStatus.OK;
+		try {
+			response= ordineService.findAll();
+		} catch (Exception e) {
+			log.error("ERRORE OrdineController - "+e.getMessage());
+			response=e.getMessage();
+			status = HttpStatus.BAD_REQUEST;
+		}
+		return ResponseEntity.status(status).body(response);	
+	}
 }
