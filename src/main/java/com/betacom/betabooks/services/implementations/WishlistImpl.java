@@ -121,12 +121,12 @@ public class WishlistImpl implements IWishlistServices {
 
         // 1. Mappa l'autore come oggetto
         AutoreDTO autore = (libro.getAutore() != null) 
-            ? new AutoreDTO(libro.getAutore().getId(), libro.getAutore().getNome(), libro.getAutore().getCognome(), null, null) 
+            ? new AutoreDTO(libro.getAutore().getId(), libro.getAutore().getNome(), libro.getAutore().getCognome(), null, null, false) 
             : null;
 
         // 2. Mappa l'editore come oggetto
         EditoreDTO editore = (libro.getEditore() != null) 
-            ? new EditoreDTO(libro.getEditore().getId(), libro.getEditore().getNome(), null) 
+            ? new EditoreDTO(libro.getEditore().getId(), libro.getEditore().getNome(), null, false) 
             : null;
 
         // 3. Costruisci il LibroDTO usando gli oggetti
