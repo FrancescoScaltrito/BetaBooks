@@ -35,8 +35,8 @@ public class LibroControllerTest {
 
     private static final long ID_AUTORE_VALIDO = 1;
     private static final long ID_EDITORE_VALIDO = 1;
-    private static final long ID_LIBRO_VALIDO = 1;
-    private static final long ID_FORMATO_VALIDO = 1;
+    private static final long ID_LIBRO_VALIDO = 26;
+    private static final long ID_FORMATO_VALIDO = 7;
     private static final List<Long> ID_CATEGORIE_VALIDE = List.of(1L, 2L);
 
     @Test
