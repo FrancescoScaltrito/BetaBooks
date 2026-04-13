@@ -3,11 +3,15 @@ package com.betacom.betabooks.services.implementations;
 import com.betacom.betabooks.dto.inputs.MailReq;
 import com.betacom.betabooks.dto.inputs.PasswordRecoveryReq;
 import com.betacom.betabooks.dto.inputs.PasswordReq;
+import com.betacom.betabooks.dto.inputs.Registrazione;
 import com.betacom.betabooks.dto.inputs.UtenteReq;
 import com.betacom.betabooks.dto.outputs.UtenteDTO;
+import com.betacom.betabooks.enums.RuoloUtente;
 import com.betacom.betabooks.models.PasswordResetToken;
+import com.betacom.betabooks.models.ProfiloUtente;
 import com.betacom.betabooks.models.Utente;
 import com.betacom.betabooks.repositories.IPasswordResetTokenRepository;
+import com.betacom.betabooks.repositories.IProfiloUtenteRepository;
 import com.betacom.betabooks.repositories.IUtenteRepository;
 import com.betacom.betabooks.services.interfaces.IMailServices;
 import com.betacom.betabooks.services.interfaces.IUtenteServices;
@@ -42,6 +46,7 @@ public class UtenteImpl implements IUtenteServices {
 	private String resetPasswordURL;
 
 	private final IUtenteRepository utenteRepository;
+	private final IProfiloUtenteRepository profiloRepo;
 	private final PasswordEncoder passwordEncoder;
 	private final AuthenticationManager authenticationManager;
 	private final IMailServices mailS;
@@ -49,8 +54,9 @@ public class UtenteImpl implements IUtenteServices {
 
 	public UtenteImpl(IUtenteRepository utenteRepository, PasswordEncoder passwordEncoder,
 			AuthenticationManager authenticationManager, IMailServices mailS,
-			IPasswordResetTokenRepository tokenRepository) {
+			IPasswordResetTokenRepository tokenRepository, IProfiloUtenteRepository profiloRepo) {
 		this.utenteRepository = utenteRepository;
+		this.profiloRepo = profiloRepo;
 		this.passwordEncoder = passwordEncoder;
 		this.authenticationManager = authenticationManager;
 		this.mailS = mailS;
@@ -58,6 +64,7 @@ public class UtenteImpl implements IUtenteServices {
 
 	}
 
+	/*
 	@Override
 	public UtenteDTO register(UtenteReq req) {
 		if (utenteRepository.existsByEmail(req.getEmail())) {
@@ -70,6 +77,38 @@ public class UtenteImpl implements IUtenteServices {
 
 		Utente salvato = utenteRepository.save(utente);
 		return toDTO(salvato);
+	}*/
+	
+
+
+	@Transactional
+	public UtenteDTO register(Registrazione req) {
+	    // 1. Controllo duplicati
+	    if (utenteRepository.existsByEmail(req.getEmail())) {
+	        throw new ResponseStatusException(HttpStatus.CONFLICT, "Email già in uso");
+	    }
+
+	    // 2. Crea e salva Utente
+	    Utente utente = new Utente();
+	    utente.setEmail(req.getEmail());
+	    utente.setPassword(passwordEncoder.encode(req.getPassword()));
+	    utente.setValidato(false); 
+	    
+	    // Gestione Ruolo (Default a USER)
+	    String ruoloDaSettare = (req.getRuolo() != null) ? req.getRuolo() : "USER";
+	    utente.setRuolo(RuoloUtente.valueOf(ruoloDaSettare));
+	    
+	    Utente utenteSalvato = utenteRepository.save(utente);
+
+	    // 3. Crea e salva Profilo associato (usando l'utente appena salvato)
+	    ProfiloUtente profilo = new ProfiloUtente();
+	    profilo.setNome(req.getNome());
+	    profilo.setCognome(req.getCognome());
+	    profilo.setUtente(utenteSalvato); // Collegamento tramite JPA
+	    profiloRepo.save(profilo);
+
+	    // 4. Ritorna il DTO dell'utente creato
+	    return toDTO(utenteSalvato);
 	}
 
 	@Override
@@ -312,6 +351,8 @@ public class UtenteImpl implements IUtenteServices {
 
 	    sendMail(acc, "🔑 Recupero Password BetaBooks", body.toString());
 	}
+
+
 
 	
 }

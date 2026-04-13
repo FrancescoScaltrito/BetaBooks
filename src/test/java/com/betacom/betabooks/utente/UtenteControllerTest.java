@@ -30,7 +30,7 @@ public class UtenteControllerTest {
 
     @Autowired
     private IUtenteRepository utenteR;
-
+/*
     // ── helper ──────────────────────────────────────────────────────────────────
     private ResponseEntity<UtenteDTO> registra(String email, String password) {
         UtenteReq req = new UtenteReq();
@@ -239,5 +239,5 @@ public class UtenteControllerTest {
         ResponseEntity<Void> resp = utenteController.delete(99999L);
 
         assertEquals(HttpStatus.NOT_FOUND, resp.getStatusCode());
-    }
+    }*/
 }

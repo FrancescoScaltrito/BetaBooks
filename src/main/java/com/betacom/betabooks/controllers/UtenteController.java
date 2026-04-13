@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.betacom.betabooks.dto.inputs.PasswordRecoveryReq;
 import com.betacom.betabooks.dto.inputs.PasswordReq;
+import com.betacom.betabooks.dto.inputs.Registrazione;
 import com.betacom.betabooks.dto.inputs.UtenteReq;
 import com.betacom.betabooks.dto.outputs.UtenteDTO;
 import com.betacom.betabooks.enums.RuoloUtente;
@@ -45,6 +46,7 @@ public class UtenteController {
     }
 
    
+    /*
     @PostMapping("/register")
     @SecurityRequirement(name = "") 
     public ResponseEntity<UtenteDTO> register(@RequestBody UtenteReq req) {
@@ -54,6 +56,7 @@ public class UtenteController {
         Utente utente = new Utente();
         utente.setEmail(req.getEmail());
         utente.setPassword(passwordEncoder.encode(req.getPassword()));
+        utente.setValidato(false);
         //utente.setRuolo(RuoloUtente.valueOf(req.getRuolo()));
         
         String ruoloDaSettare = (req.getRuolo() != null) ? req.getRuolo() : "USER";
@@ -70,7 +73,14 @@ public class UtenteController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
-
+*/
+    @PostMapping("/register")
+    @SecurityRequirement(name = "") 
+    public ResponseEntity<UtenteDTO> register(@RequestBody Registrazione req) {
+        UtenteDTO utenteCreato = utS.register(req);
+       
+        return ResponseEntity.status(HttpStatus.CREATED).body(utenteCreato);
+    }
    
     @GetMapping
     public List<UtenteDTO> getAll() {

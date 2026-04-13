@@ -15,7 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter @Entity
-@Table(name = "recensioni", uniqueConstraints = {@UniqueConstraint(columnNames = {"id_profilo", "id_libro"})})
+@Table(name = "recensioni", uniqueConstraints = {@UniqueConstraint(columnNames = {"id_utente", "id_libro"})})
 public class Recensione {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

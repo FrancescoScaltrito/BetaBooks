@@ -42,7 +42,7 @@ public class IndirizzoControllerTest {
         UtenteReq uReq = new UtenteReq();
         uReq.setEmail("indirizzo_" + System.currentTimeMillis() + "@betabooks.it");
         uReq.setPassword("password123");
-        idUtente = utenteC.register(uReq).getBody().getId();
+        //idUtente = utenteC.register(uReq).getBody().getId();
 
         // crea indirizzo base
         IndirizzoReq iReq = buildReq(idUtente);

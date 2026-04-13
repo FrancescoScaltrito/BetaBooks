@@ -2,6 +2,7 @@ package com.betacom.betabooks.services.interfaces;
 
 import com.betacom.betabooks.dto.inputs.PasswordRecoveryReq;
 import com.betacom.betabooks.dto.inputs.PasswordReq;
+import com.betacom.betabooks.dto.inputs.Registrazione;
 import com.betacom.betabooks.dto.inputs.UtenteReq;
 import com.betacom.betabooks.dto.outputs.UtenteDTO;
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.Map; // <-- Importante aggiungere questo import!
 
 public interface IUtenteServices {
     
-    UtenteDTO register(UtenteReq req);
+
     
     // AGGIUNGI QUESTA RIGA:
     Map<String, Object> login(UtenteReq req); 
@@ -25,4 +26,6 @@ public interface IUtenteServices {
 	void cambiaPassword(PasswordReq req) throws Exception;
 	void emailCambioPassword(String email) throws Exception;
 	void confermaRecuperoPassword(PasswordRecoveryReq req) throws Exception;
+
+	UtenteDTO register(Registrazione req);
 }

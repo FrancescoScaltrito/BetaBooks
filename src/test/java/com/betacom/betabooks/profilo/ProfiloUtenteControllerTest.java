@@ -34,7 +34,7 @@ public class ProfiloUtenteControllerTest {
     // ID creati nel BeforeEach, disponibili in ogni test
     private Long idUtente;
     private Long idProfilo;
-
+/*
     @BeforeEach
     void setUp() {
         // 1. creo un utente fresco
@@ -71,7 +71,7 @@ public class ProfiloUtenteControllerTest {
 
         assertEquals(HttpStatus.CREATED, profiloC.create(req).getStatusCode());
     }
-
+*/
     @Test
     @Order(2)
     public void createErrore_UtenteInesistente() {

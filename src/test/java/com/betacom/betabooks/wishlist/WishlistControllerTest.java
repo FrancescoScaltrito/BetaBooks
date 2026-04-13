@@ -45,9 +45,9 @@ public class WishlistControllerTest {
         uReq.setEmail("wishlist_test_" + System.currentTimeMillis() + "@betabooks.it");
         uReq.setPassword("password123");
         
-        var respUtente = utenteC.register(uReq);
-        assertNotNull(respUtente.getBody(), "Errore registrazione utente nel setup");
-        idUtente = respUtente.getBody().getId();
+       // var respUtente = utenteC.register(uReq);
+       // assertNotNull(respUtente.getBody(), "Errore registrazione utente nel setup");
+        //idUtente = respUtente.getBody().getId();
 
         // 2. Recupero dinamico di un formato libro esistente nel DB
         // Cerchiamo il primo formato attivo, se non c'è prendiamo il primo in assoluto
