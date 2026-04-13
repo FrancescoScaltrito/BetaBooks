@@ -24,4 +24,7 @@ public class Categoria {
 
     @Column(name = "descrizione", columnDefinition = "TEXT")
     private String descrizione;
+    
+    @Column(name = "attivo", nullable = false)
+    private boolean attivo;
 }

@@ -14,4 +14,5 @@ public class CategoriaReq {
 	private Long id;
     private String nome;
     private String descrizione;
+    private boolean attivo;
 }

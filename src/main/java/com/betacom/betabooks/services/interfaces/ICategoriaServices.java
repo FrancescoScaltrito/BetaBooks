@@ -12,4 +12,6 @@ public interface ICategoriaServices {
 	void delete(Long id) throws Exception;
 	CategoriaDTO findById(Long id) throws Exception;
 	List<CategoriaDTO> findAll() throws Exception;
+	
+	void disattiva(Long id) throws Exception;
 }

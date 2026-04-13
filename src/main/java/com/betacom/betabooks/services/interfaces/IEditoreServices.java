@@ -11,4 +11,6 @@ public interface IEditoreServices {
 	void delete(Long id) throws Exception;
 	EditoreDTO findById(Long id) throws Exception;
 	List<EditoreDTO> findAll() throws Exception;
+	
+	void disattiva(Long id) throws Exception;
 }

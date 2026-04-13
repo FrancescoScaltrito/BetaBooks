@@ -9,6 +9,7 @@ import com.betacom.betabooks.dto.outputs.CategoriaDTO;
 import com.betacom.betabooks.models.Categoria;
 import com.betacom.betabooks.repositories.ICategoriaRepository;
 import com.betacom.betabooks.services.interfaces.ICategoriaServices;
+import com.betacom.betabooks.utils.FormatoLibroMapper;
 import com.betacom.betabooks.utils.Mapper;
 
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class CategoriaImpl implements ICategoriaServices{
+
+    private final FormatoLibroMapper formatoLibroMapper;
 	private final ICategoriaRepository cateR;
 
 	@Override
@@ -30,6 +33,7 @@ public class CategoriaImpl implements ICategoriaServices{
 		Categoria cat = new Categoria();
 		cat.setDescrizione(req.getDescrizione());
 		cat.setNome(req.getNome());
+		cat.setAttivo(req.isAttivo());
 		
 		return cateR.save(cat).getId();
 	}
@@ -43,6 +47,7 @@ public class CategoriaImpl implements ICategoriaServices{
 			c.setDescrizione(req.getDescrizione());
 		if(req.getNome()!=null)
 			c.setNome(req.getNome());
+		c.setAttivo(req.isAttivo());
 		cateR.save(c);
 	}
 
@@ -66,6 +71,15 @@ public class CategoriaImpl implements ICategoriaServices{
 		log.debug("CategoriaImpl - findAll");	
 		List<Categoria> c = cateR.findAll();
 		return Mapper.buildCategoriaDTO(c);
+	}
+
+	@Override
+	public void disattiva(Long id) throws Exception {
+		log.debug("CategoriaImpl - disattiva {}",id);
+		Categoria c = cateR.findById(id).orElseThrow( () -> new Exception("ERRORE disattiva - cateogria non trovata in db"));
+		c.setAttivo(false);
+		cateR.save(c);
+		
 	}
 	
 }
