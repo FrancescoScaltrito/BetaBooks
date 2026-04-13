@@ -55,6 +55,7 @@ public class Mapper {
                 .nome(a.getNome())
                 .cognome(a.getCognome())
                 .nazionalita(a.getNazionalita())
+                .attivo(a.isAttivo())
                 .build();
     }
 
@@ -73,6 +74,7 @@ public class Mapper {
         		.id(e.getId())
                 .descrizione(e.getDescrizione())
                 .nome(e.getNome())
+                .attivo(e.isAttivo())
                 .build();
     }
 
@@ -91,6 +93,7 @@ public class Mapper {
         		.id(c.getId())
                 .descrizione(c.getDescrizione())
                 .nome(c.getNome())
+                .attivo(c.isAttivo())
                 .build();
     }
 

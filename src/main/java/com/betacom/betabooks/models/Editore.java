@@ -26,4 +26,7 @@ public class Editore {
     
     @Column(name = "descrizione", columnDefinition = "TEXT")
     private String descrizione;
+    
+    @Column(name = "attivo", nullable = false)
+    private boolean attivo;
 }

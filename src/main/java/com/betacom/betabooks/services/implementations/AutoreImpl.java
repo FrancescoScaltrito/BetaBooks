@@ -41,6 +41,7 @@ public class AutoreImpl implements IAutoreServices{
 		autore.setCognome(req.getCognome());
 		autore.setBiografia(req.getBiografia());
 		autore.setNazionalita(req.getNazionalita());
+		autore.setAttivo(req.isAttivo());
 		return autoreR.save(autore).getId();
 		
 	}
@@ -58,6 +59,7 @@ public class AutoreImpl implements IAutoreServices{
 			autore.setNome(req.getNome());
 		if(req.getNazionalita()!=null)
 			autore.setNazionalita(req.getNazionalita());
+		autore.setAttivo(req.isAttivo());
 		autoreR.save(autore);
 	}
 
@@ -83,6 +85,14 @@ public class AutoreImpl implements IAutoreServices{
 		log.debug("AutoreImpl - findAll");
 		List<Autore> autori = autoreR.findAll();
 		return Mapper.buildAutoreDTO(autori);
+	}
+
+	@Override
+	public void disattiva(Long id) throws Exception {
+		log.debug("AutoreImpl - disattiva {} ",id);
+		Autore a = autoreR.findById(id).orElseThrow( () -> new Exception("ERRORE disattiva - Autore non trovato in DB"));
+		a.setAttivo(false);
+		autoreR.save(a);
 	}
 
 }

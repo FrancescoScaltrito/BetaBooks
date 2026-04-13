@@ -30,4 +30,7 @@ public class Autore {
 
     @Column(name = "biografia", columnDefinition = "TEXT")
     private String biografia;
+    
+    @Column(name = "attivo", nullable = false)
+    private boolean attivo;
 }

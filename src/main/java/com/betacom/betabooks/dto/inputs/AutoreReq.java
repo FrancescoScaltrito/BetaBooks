@@ -16,4 +16,5 @@ public class AutoreReq {
     private String cognome;
     private String nazionalita;
     private String biografia;
+    private boolean attivo;
 }
