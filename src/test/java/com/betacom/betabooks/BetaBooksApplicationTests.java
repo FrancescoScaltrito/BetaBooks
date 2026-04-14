@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import com.betacom.betabooks.carrello.CarrelloControllerTest;
 import com.betacom.betabooks.libro.LibroControllerTest;
@@ -25,6 +26,7 @@ import com.betacom.betabooks.profilo.ProfiloUtenteControllerTest;
     WishlistControllerTest.class,
     ProfiloUtenteControllerTest.class
 })
+
 @SpringBootTest
 class BetaBooksApplicationTests {
 
