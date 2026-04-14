@@ -27,5 +27,5 @@ public class OrdineDTO {
     private List<OrdineItemDTO> items;
     
     // Info sull'indirizzo (opzionale: puoi mettere l'ID o una stringa riassuntiva)
-    private Long idIndirizzo;
+    private String indirizzo;
 }

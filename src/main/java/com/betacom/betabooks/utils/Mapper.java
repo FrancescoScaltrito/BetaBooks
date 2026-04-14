@@ -229,6 +229,11 @@ public class Mapper {
         BigDecimal totaleOrdine = itemDTOs.stream()
                 .map(OrdineItemDTO::getSubtotale)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        String indirizzo=null;
+        if (o.getIndirizzo() != null &&  o.getIndirizzo().getId()!= null) {
+        	 indirizzo=o.getIndirizzo().getVia()+ " "+o.getIndirizzo().getCivico()+", "+o.getIndirizzo().getComune()+" "+"("+o.getIndirizzo().getPaese()+")";
+        }
 
         return OrdineDTO.builder()
                 .id(o.getId())
@@ -237,7 +242,7 @@ public class Mapper {
                 .metodoPagamento(o.getMetodoPagamento())
                 .totaleComplessivo(totaleOrdine)
                 .items(itemDTOs)
-                .idIndirizzo(o.getIndirizzo() != null ? o.getIndirizzo().getId() : null)
+                .indirizzo(indirizzo)
                 .build();
     }
 
