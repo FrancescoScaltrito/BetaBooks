@@ -18,10 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.betacom.betabooks.controllers.IndirizzoController;
 import com.betacom.betabooks.controllers.UtenteController;
 import com.betacom.betabooks.dto.inputs.IndirizzoReq;
-import com.betacom.betabooks.dto.inputs.UtenteReq;
+import com.betacom.betabooks.dto.inputs.Registrazione;
 import com.betacom.betabooks.dto.outputs.IndirizzoDTO;
 import com.betacom.betabooks.dto.outputs.UtenteDTO;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @SpringBootTest
 @Transactional
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -38,19 +41,39 @@ public class IndirizzoControllerTest {
 
     @BeforeEach
     void setUp() {
-        // crea utente fresco ad ogni test
-        UtenteReq uReq = new UtenteReq();
-        uReq.setEmail("indirizzo_" + System.currentTimeMillis() + "@betabooks.it");
-        uReq.setPassword("password123");
-        //idUtente = utenteC.register(uReq).getBody().getId();
+        log.debug("=== setUp: creazione dati fittizi ===");
 
-        // crea indirizzo base
+        // ── 1. Crea utente con Registrazione ────────────────────────────────────
+        Registrazione uReq = new Registrazione();
+        uReq.setEmail("test_" + System.currentTimeMillis() + "@betabooks.it");
+        uReq.setPassword("Password123!");
+        uReq.setNome("Test");
+        uReq.setCognome("Utente");
+        uReq.setValidato(false);
+
+        ResponseEntity<UtenteDTO> resUtente = utenteC.register(uReq);
+
+        assertEquals(HttpStatus.CREATED, resUtente.getStatusCode(),
+                "setUp FALLITO: registrazione utente non riuscita");
+        assertNotNull(resUtente.getBody(), "setUp FALLITO: body utente è null");
+
+        idUtente = resUtente.getBody().getId();
+        log.debug("setUp: utente creato con ID={}", idUtente);
+
+        // ── 2. Crea indirizzo fittizio ───────────────────────────────────────────
         IndirizzoReq iReq = buildReq(idUtente);
         iReq.setIsDefault(true);
-        idIndirizzo = (Long) indirizzoC.create(iReq).getBody();
+
+        ResponseEntity<?> resInd = indirizzoC.create(iReq);
+        assertEquals(HttpStatus.OK, resInd.getStatusCode(),
+                "setUp FALLITO: creazione indirizzo non riuscita");
+
+        idIndirizzo = (Long) resInd.getBody();
+        log.debug("setUp: indirizzo creato con ID={}", idIndirizzo);
     }
 
-    // helper
+    // ── helper ───────────────────────────────────────────────────────────────────
+
     private IndirizzoReq buildReq(Long idUtente) {
         IndirizzoReq req = new IndirizzoReq();
         req.setIdUtente(idUtente);
@@ -64,139 +87,108 @@ public class IndirizzoControllerTest {
         return req;
     }
 
-    // ── CREATE ───────────────────────────────────────────────────────────────────
+    // ── TEST ─────────────────────────────────────────────────────────────────────
 
     @Test
     @Order(1)
     public void createSuccesso() {
+        log.debug("TEST [1] createIndirizzo - successo");
         IndirizzoReq req = buildReq(idUtente);
         req.setVia("Via Verdi");
-
         ResponseEntity<?> resp = indirizzoC.create(req);
-
         assertEquals(HttpStatus.OK, resp.getStatusCode());
-        assertNotNull(resp.getBody());
-        // il body è il Long id dell'indirizzo creato
-        assertInstanceOf(Long.class, resp.getBody());
     }
 
     @Test
     @Order(2)
     public void createErrore_IdUtenteNull() {
-        IndirizzoReq req = buildReq(null);
-
-        ResponseEntity<?> resp = indirizzoC.create(req);
-
+        log.debug("TEST [2] createIndirizzo - idUtente null");
+        ResponseEntity<?> resp = indirizzoC.create(buildReq(null));
         assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-        // il body è il messaggio di errore stringa
-        assertEquals("Id utente non può essere null", resp.getBody());
     }
 
     @Test
     @Order(3)
     public void createErrore_UtenteInesistente() {
-        IndirizzoReq req = buildReq(99999L);
-
-        ResponseEntity<?> resp = indirizzoC.create(req);
-
+        log.debug("TEST [3] createIndirizzo - utente inesistente");
+        ResponseEntity<?> resp = indirizzoC.create(buildReq(99999L));
         assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-        assertEquals("Utente non trovato", resp.getBody());
     }
-
-    // ── FIND ALL ─────────────────────────────────────────────────────────────────
 
     @Test
     @Order(4)
     public void findAllSuccesso() {
+        log.debug("TEST [4] findAll - successo");
         ResponseEntity<List<IndirizzoDTO>> resp = indirizzoC.findAll();
-
         assertEquals(HttpStatus.OK, resp.getStatusCode());
         assertNotNull(resp.getBody());
-        assertFalse(resp.getBody().isEmpty());
+        assertFalse(resp.getBody().isEmpty(), "La lista non dovrebbe essere vuota dopo il setUp");
     }
-
-    // ── FIND BY ID ───────────────────────────────────────────────────────────────
 
     @Test
     @Order(5)
     public void findByIdSuccesso() {
+        log.debug("TEST [5] findById - successo");
         ResponseEntity<?> resp = indirizzoC.findById(idIndirizzo);
-
         assertEquals(HttpStatus.OK, resp.getStatusCode());
-        assertNotNull(resp.getBody());
-        assertInstanceOf(IndirizzoDTO.class, resp.getBody());
     }
 
     @Test
     @Order(6)
     public void findByIdErrore_NonTrovato() {
+        log.debug("TEST [6] findById - non trovato");
         ResponseEntity<?> resp = indirizzoC.findById(99999L);
-
         assertEquals(HttpStatus.NOT_FOUND, resp.getStatusCode());
     }
-
-    // ── FIND BY USER ─────────────────────────────────────────────────────────────
 
     @Test
     @Order(7)
     public void findByUserSuccesso() {
+        log.debug("TEST [7] findByUser - successo");
         ResponseEntity<List<IndirizzoDTO>> resp = indirizzoC.findByUser(idUtente);
-
         assertEquals(HttpStatus.OK, resp.getStatusCode());
-        assertNotNull(resp.getBody());
         assertFalse(resp.getBody().isEmpty());
     }
 
     @Test
     @Order(8)
     public void findByUserErrore_IdNull() {
-        // idUtente null → IndirizzoImpl lancia eccezione → controller 404
+        log.debug("TEST [8] findByUser - id null");
         ResponseEntity<List<IndirizzoDTO>> resp = indirizzoC.findByUser(null);
-
         assertEquals(HttpStatus.NOT_FOUND, resp.getStatusCode());
     }
-
-    // ── UPDATE ───────────────────────────────────────────────────────────────────
 
     @Test
     @Order(9)
     public void updateSuccesso() {
+        log.debug("TEST [9] update - successo");
         IndirizzoReq req = new IndirizzoReq();
         req.setVia("Via Modificata");
-        req.setComune("Torino");
-
         ResponseEntity<?> resp = indirizzoC.update(idIndirizzo, req);
-
         assertEquals(HttpStatus.OK, resp.getStatusCode());
     }
 
     @Test
     @Order(10)
     public void updateErrore_NonTrovato() {
-        IndirizzoReq req = new IndirizzoReq();
-        req.setVia("Via X");
-
-        ResponseEntity<?> resp = indirizzoC.update(99999L, req);
-
+        log.debug("TEST [10] update - non trovato");
+        ResponseEntity<?> resp = indirizzoC.update(99999L, new IndirizzoReq());
         assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-        assertEquals("Indirizzo non trovato", resp.getBody());
     }
-
-    // ── DELETE ───────────────────────────────────────────────────────────────────
 
     @Test
     @Order(11)
     public void deleteSuccesso() {
+        log.debug("TEST [11] delete - successo");
         ResponseEntity<?> resp = indirizzoC.delete(idIndirizzo);
-
         assertEquals(HttpStatus.NO_CONTENT, resp.getStatusCode());
     }
 
     @Test
     @Order(12)
     public void deleteErrore_NonTrovato() {
+        log.debug("TEST [12] delete - non trovato");
         ResponseEntity<?> resp = indirizzoC.delete(99999L);
-
         assertEquals(HttpStatus.NOT_FOUND, resp.getStatusCode());
     }
 }

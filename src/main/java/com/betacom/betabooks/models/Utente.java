@@ -37,7 +37,7 @@ public class Utente {
     private String password;
     
     @Column(name = "validato", nullable = false)
-    private Boolean validato;
+    private Boolean validato = false;
     
     @Enumerated(EnumType.STRING)
     @Column(name = "ruolo")
