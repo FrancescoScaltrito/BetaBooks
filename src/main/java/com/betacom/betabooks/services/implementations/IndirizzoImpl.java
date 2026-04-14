@@ -88,7 +88,7 @@ public class IndirizzoImpl implements IIndirizzoServices {
                 log.debug("Indirizzo eliminato");
             } catch (DataIntegrityViolationException e) {
                 log.warn("Indirizzo collegato a ordini: disattivazione in corso");
-                
+       
                 indirizzo.setAttivo(false);
                 indirizzoR.save(indirizzo);
             }
@@ -156,6 +156,7 @@ public class IndirizzoImpl implements IIndirizzoServices {
                 .paese(i.getPaese())
                 .isDefault(i.getIsDefault())
                 .noteConsegna(i.getNoteConsegna())
+                .attivo(i.getAttivo())
                 .build();
     }
 }

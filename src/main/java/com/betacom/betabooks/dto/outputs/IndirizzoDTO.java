@@ -19,4 +19,5 @@ public class IndirizzoDTO {
     private String paese;
     private Boolean isDefault;
     private String noteConsegna;
+    private Boolean attivo;
 }
