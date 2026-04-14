@@ -61,6 +61,7 @@ public class UtenteController {
         
         String ruoloDaSettare = (req.getRuolo() != null) ? req.getRuolo() : "USER";
         utente.setRuolo(RuoloUtente.valueOf(ruoloDaSettare));
+        utente.setValidato(false);
 
         Utente salvato = utenteRepository.save(utente);
 
