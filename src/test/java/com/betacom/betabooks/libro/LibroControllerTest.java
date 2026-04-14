@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.betabooks.controllers.LibroController;
@@ -29,6 +30,10 @@ import lombok.extern.slf4j.Slf4j;
 @SpringBootTest
 @Transactional
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestPropertySource(properties = {
+	    "database.username=postgres",
+	    "database.password=100720"
+	})
 public class LibroControllerTest {
 
     @Autowired

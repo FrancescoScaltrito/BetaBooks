@@ -18,4 +18,5 @@ public class RecensioneDTO {
     private Short valutazione;
     private String descrizione;
     private LocalDateTime data;
+    private Long idUtente;
 }

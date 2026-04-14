@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.betabooks.controllers.EditoreController;
@@ -24,6 +25,10 @@ import lombok.extern.slf4j.Slf4j;
 @SpringBootTest
 @Transactional
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestPropertySource(properties = {
+	    "database.username=postgres",
+	    "database.password=100720"
+	})
 public class EditoreControllerTest {
 
     @Autowired

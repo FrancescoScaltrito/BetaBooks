@@ -271,6 +271,7 @@ public class Mapper {
     			.valutazione(r.getValutazione())
     			.descrizione(r.getDescrizione())
     			.data(r.getData())
+    			.idUtente(r.getProfiloUtente().getUtente().getId())
     			.build();
     }
     

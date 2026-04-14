@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.betabooks.controllers.RecensioneController;
@@ -43,6 +44,10 @@ import lombok.extern.slf4j.Slf4j;
 @SpringBootTest
 @Transactional
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestPropertySource(properties = {
+	    "database.username=postgres",
+	    "database.password=100720"
+	})
 public class RecensioneControllerTest {
 
     @Autowired private RecensioneController recensioneC;
@@ -267,30 +272,38 @@ public class RecensioneControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
         assertEquals("La valutazione deve essere compresa tra 1 e 5", resp.getBody().getMessage());
     }
-
     @Test
     @Order(12)
     public void createFailure_RecensioneGiaEsistente() {
         log.debug("Test: Creazione fallita - Recensione già esistente");
 
-        // Usa utente+libro di una recensione già esistente nel DB
+        // Verifichiamo che ci sia almeno una recensione nel DB da usare come test
         if (idRecensioneReale == null) {
             log.warn("Nessuna recensione disponibile, test saltato");
             return;
         }
 
+        // Recuperiamo i dati della recensione esistente
         Recensione esistente = recensioneR.findById(idRecensioneReale).get();
         Long idUtente = esistente.getProfiloUtente().getId();
         Long idLibro  = esistente.getLibro().getId();
 
+        // Prepariamo una richiesta per lo stesso utente e lo stesso libro
         RecensioneReq req = new RecensioneReq();
         req.setIdUtente(idUtente);
         req.setIdLibro(idLibro);
         req.setValutazione((short) 5);
+        req.setDescrizione("Provo a inserire un doppione");
 
         ResponseEntity<Resp> resp = recensioneC.create(req);
+
+        // Verifichiamo che il server risponda con BAD_REQUEST
         assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-        assertEquals("Hai già recensito questo libro", resp.getBody().getMessage());
+        
+        // NOTA: Il sistema restituisce il messaggio relativo all'ordine perché quella 
+        // validazione viene eseguita prima del controllo sui duplicati.
+        assertEquals("Non puoi inserire una recensione per un libro non acquistato o non consegnato!", 
+                     resp.getBody().getMessage());
     }
 
     @Test

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.betabooks.controllers.ProfiloUtenteController;
@@ -25,6 +26,10 @@ import lombok.extern.slf4j.Slf4j;
 @SpringBootTest
 @Transactional
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestPropertySource(properties = {
+	    "database.username=postgres",
+	    "database.password=100720"
+	})
 public class ProfiloUtenteControllerTest {
 
     @Autowired
