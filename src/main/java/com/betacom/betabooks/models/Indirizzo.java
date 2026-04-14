@@ -48,4 +48,7 @@ public class Indirizzo {
 
     @Column(name = "note_consegna", columnDefinition = "TEXT")
     private String noteConsegna;
+    
+    @Column(name = "attivo")
+    private Boolean attivo = true;
 }

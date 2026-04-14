@@ -3,6 +3,7 @@ package com.betacom.betabooks.services.implementations;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.betacom.betabooks.dto.inputs.IndirizzoReq;
@@ -76,13 +77,29 @@ public class IndirizzoImpl implements IIndirizzoServices {
     }
 
     
-    @Override
-    public void delete(Long id) throws Exception {
-        if (!indirizzoR.existsById(id))
-            throw new Exception("Indirizzo non trovato");
+        @Override
+        public void delete(Long id) throws Exception {
+            Indirizzo indirizzo = indirizzoR.findById(id)
+                    .orElseThrow(() -> new Exception("Indirizzo non trovato"));
 
-        indirizzoR.deleteById(id);
-    }
+            try {
+                // Proviamo a cancellare in una sotto-transazione o in modo isolato
+                this.cancellaFisicamente(indirizzo);
+                log.debug("Indirizzo eliminato");
+            } catch (DataIntegrityViolationException e) {
+                log.warn("Indirizzo collegato a ordini: disattivazione in corso");
+       
+                indirizzo.setAttivo(false);
+                indirizzoR.save(indirizzo);
+            }
+        }
+
+    
+        @Transactional
+        public void cancellaFisicamente(Indirizzo indirizzo) {
+            indirizzoR.delete(indirizzo);
+            indirizzoR.flush(); 
+        }
 
     
     @Override
@@ -139,6 +156,7 @@ public class IndirizzoImpl implements IIndirizzoServices {
                 .paese(i.getPaese())
                 .isDefault(i.getIsDefault())
                 .noteConsegna(i.getNoteConsegna())
+                .attivo(i.getAttivo())
                 .build();
     }
 }
