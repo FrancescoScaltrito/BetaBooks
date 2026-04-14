@@ -211,6 +211,8 @@ public class Mapper {
                 .prezzoUnitarioAcquisto(item.getPrezzoUnitarioAcquisto())
                 .subtotale(subtotale)
                 .copertina(item.getFormatoLibro().getCopertina())
+                .tipoSupporto(item.getFormatoLibro().getTipoSupporto())
+                .tipoCopertina(item.getFormatoLibro().getTipoCopertina())
                 .build();
     }
 
