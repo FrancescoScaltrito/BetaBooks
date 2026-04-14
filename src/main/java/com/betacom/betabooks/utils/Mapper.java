@@ -210,6 +210,7 @@ public class Mapper {
                 .quantita(item.getQuantita())
                 .prezzoUnitarioAcquisto(item.getPrezzoUnitarioAcquisto())
                 .subtotale(subtotale)
+                .copertina(item.getFormatoLibro().getCopertina())
                 .build();
     }
 

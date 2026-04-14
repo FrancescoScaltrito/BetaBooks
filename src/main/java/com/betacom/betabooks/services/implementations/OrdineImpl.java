@@ -51,6 +51,7 @@ public class OrdineImpl implements IOrdineServices {
     private final IIndirizzoRepository indirizzoRepo;
 
     //da utilizzare quando il cliente clicca su "Conferma e paga", ovvero quando ha già compilato tutti i campi della pagina di checkout (pagamento e indirizzo)
+   
     @Transactional(rollbackFor = Exception.class)
     public OrdineDTO creaOrdine(Long idUtente, MetodoPagamento metodo, Long idIndirizzo) throws Exception {
     	
@@ -71,16 +72,21 @@ public class OrdineImpl implements IOrdineServices {
         // creazione dell'ordine
         Ordine ordine = inizializzaOrdine(utente, indirizzo, metodo, carrelloDto.getPrezzoTotaleComplessivo());
      
+ 
+        log.info("carrello dto items: " + carrelloDto.getItems().size());
+        
         // trasformiamo gli item del carrello in item dell'ordine 
         for (CarrelloItemDTO itemDto : carrelloDto.getItems()) {
         	
-        	log.debug("Creazione di un ordineItem");
+        	log.info("Creazione di un ordineItem");
         	
         	processaSingoloItem(ordine, itemDto);
         }
 
         // salviamo l'ordine (a cascata salverà anche i relativi OrdineItem)
         Ordine ordineSalvato = ordineRepo.save(ordine);
+        
+        log.info("Sto per salvare l'ordine. Numero di item nella lista: " + ordineSalvato.getItems().size());
 
         // svuotiamo il carrello
         carrelloService.svuotaCarrello(idUtente);
@@ -89,7 +95,7 @@ public class OrdineImpl implements IOrdineServices {
         
         return Mapper.buildOrdineDTO(ordineSalvato); 
     }
-    
+  
     private Ordine inizializzaOrdine(Utente utente, Indirizzo indirizzo, MetodoPagamento metodo, BigDecimal totale) {
         Ordine ordine = new Ordine();
         ordine.setUtente(utente);
@@ -116,6 +122,8 @@ public class OrdineImpl implements IOrdineServices {
 
         // Creazione legame Ordine <-> Item
         ordine.getItems().add(costruisciOrdineItem(ordine, itemDto, formato));
+        
+        log.info("Creazione di un ordineItem: "+ordine.toString());
     }
 
     private void gestisciDecrementoMagazzino(CarrelloItemDTO itemDto) throws Exception {

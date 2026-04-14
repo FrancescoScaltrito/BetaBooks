@@ -68,6 +68,7 @@ public class SecurityConfig {
             	    .requestMatchers(HttpMethod.GET, "/api/libro/**").permitAll()
             	    .requestMatchers("/api/utenti/register").permitAll()
             	    .requestMatchers("/api/auth/login").permitAll()
+            	    .requestMatchers("/api/auth/**").permitAll()
             	    .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
 
             	    .requestMatchers("/api/utenti/sendValidation","/api/utenti/emailValidate").permitAll()

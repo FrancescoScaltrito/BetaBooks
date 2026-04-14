@@ -28,26 +28,7 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final IUtenteRepository utenteRepository;
-    /*
-    @GetMapping("/me")
-    public ResponseEntity<UtenteDTO> getMe(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
 
-        // Il 'name' dell'authentication è l'email (o username) usata nel login
-        Utente utente = utenteRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
-
-        UtenteDTO dto = UtenteDTO.builder()
-                .id(utente.getId())
-                .email(utente.getEmail())
-                .ruolo(utente.getRuolo().name())
-                // Aggiungi qui nome e cognome se li hai nel DTO per mostrarli in Angular!
-                .build();
-
-        return ResponseEntity.ok(dto);
-    }*/
 /*
     @PostMapping("/login")
     public ResponseEntity<UtenteDTO> login(@RequestBody UtenteReq req) {
@@ -76,18 +57,14 @@ public class AuthController {
 
             return ResponseEntity.ok(dto);
 
-        } /*catch (AuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }*/  /*
+        }  
         catch (AuthenticationException e) {
             System.out.println("--- ERRORE AUTENTICAZIONE: " + e.getMessage());
             e.printStackTrace(); // <--- QUESTO CI DICE TUTTO
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-    }
-    */
+    }*/
+    
     
     @GetMapping("/me")
     public ResponseEntity<UtenteDTO> getMe(Authentication authentication) {

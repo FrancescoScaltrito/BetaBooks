@@ -17,4 +17,6 @@ public class OrdineItemDTO {
     private Integer quantita;
     private BigDecimal prezzoUnitarioAcquisto; 
     private BigDecimal subtotale;
+    
+    private String copertina;
 }

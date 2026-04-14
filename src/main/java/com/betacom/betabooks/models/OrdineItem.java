@@ -28,6 +28,7 @@ public class OrdineItem {
 
     @ManyToOne
     @JoinColumn(name = "id_formato", nullable = false)
+    @EqualsAndHashCode.Include 
     private FormatoLibro formatoLibro;
 
     @Column(name = "quantita_ordinata", nullable = false)
@@ -35,6 +36,7 @@ public class OrdineItem {
 
     @ManyToOne
     @JoinColumn(name = "id_ordine", nullable = false)
+    @EqualsAndHashCode.Include 
     private Ordine ordine;
 
     @Column(name = "prezzo_unitario_storico", nullable = false, precision = 10, scale = 2)

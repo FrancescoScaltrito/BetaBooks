@@ -46,34 +46,6 @@ public class UtenteController {
     }
 
    
-    /*
-    @PostMapping("/register")
-    @SecurityRequirement(name = "") 
-    public ResponseEntity<UtenteDTO> register(@RequestBody UtenteReq req) {
-        if (utenteRepository.existsByEmail(req.getEmail())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
-        Utente utente = new Utente();
-        utente.setEmail(req.getEmail());
-        utente.setPassword(passwordEncoder.encode(req.getPassword()));
-        utente.setValidato(false);
-        //utente.setRuolo(RuoloUtente.valueOf(req.getRuolo()));
-        
-        String ruoloDaSettare = (req.getRuolo() != null) ? req.getRuolo() : "USER";
-        utente.setRuolo(RuoloUtente.valueOf(ruoloDaSettare));
-
-        Utente salvato = utenteRepository.save(utente);
-
-        UtenteDTO dto = UtenteDTO.builder()
-                .id(salvato.getId())
-                .email(salvato.getEmail())
-                .ruolo(salvato.getRuolo().name())
-                .validato(salvato.getValidato())
-                .build();
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
-    }
-*/
     @PostMapping("/register")
     @SecurityRequirement(name = "") 
     public ResponseEntity<UtenteDTO> register(@RequestBody Registrazione req) {
