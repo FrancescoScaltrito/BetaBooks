@@ -1,6 +1,12 @@
 package com.betacom.betabooks.wishlist;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
@@ -10,13 +16,27 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.betacom.betabooks.controllers.UtenteController;
 import com.betacom.betabooks.controllers.WishlistController;
-import com.betacom.betabooks.dto.inputs.UtenteReq;
-import com.betacom.betabooks.repositories.IFormatoLibroRepository; // Aggiunto
-import com.betacom.betabooks.models.FormatoLibro; // Aggiunto
+import com.betacom.betabooks.dto.outputs.WishlistDTO;
+import com.betacom.betabooks.enums.RuoloUtente;
+import com.betacom.betabooks.enums.TipoSupporto;
+import com.betacom.betabooks.models.Autore;
+import com.betacom.betabooks.models.Carrello;
+import com.betacom.betabooks.models.Editore;
+import com.betacom.betabooks.models.FormatoLibro;
+import com.betacom.betabooks.models.Libro;
+import com.betacom.betabooks.models.Utente;
+import com.betacom.betabooks.models.Wishlist;
+import com.betacom.betabooks.repositories.IAutoreRepository;
+import com.betacom.betabooks.repositories.ICarrelloRepository;
+import com.betacom.betabooks.repositories.IEditoreRepository;
+import com.betacom.betabooks.repositories.IFormatoLibroRepository;
+import com.betacom.betabooks.repositories.ILibroRepository;
+import com.betacom.betabooks.repositories.IUtenteRepository;
+import com.betacom.betabooks.repositories.IWishlistRepository;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,110 +50,208 @@ public class WishlistControllerTest {
     private WishlistController wishlistC;
 
     @Autowired
-    private UtenteController utenteC;
+    private IUtenteRepository utenteR;
 
     @Autowired
-    private IFormatoLibroRepository formatoR; // Iniettato per trovare record reali
+    private ILibroRepository libroR;
+
+    @Autowired
+    private IFormatoLibroRepository formatoLibroR;
+
+    @Autowired
+    private IWishlistRepository wishlistR;
+
+    @Autowired
+    private ICarrelloRepository carrelloR;
+
+    @Autowired
+    private IAutoreRepository autoreR;
+
+    @Autowired
+    private IEditoreRepository editoreR;
 
     private Long idUtente;
-    private Long idFormatoValido; // Diventa dinamico
+    private Long idFormatoInWishlist;
+    private Long idFormatoNotInWishlist;
+    private Long idWishlist;
 
     @BeforeEach
     void setUp() {
-        // 1. Creazione utente fresco (ottimo per isolamento)
-        UtenteReq uReq = new UtenteReq();
-        uReq.setEmail("wishlist_test_" + System.currentTimeMillis() + "@betabooks.it");
-        uReq.setPassword("password123");
-        
-       // var respUtente = utenteC.register(uReq);
-       // assertNotNull(respUtente.getBody(), "Errore registrazione utente nel setup");
-        //idUtente = respUtente.getBody().getId();
+        log.debug("Esecuzione setUp: Creazione entità fisse per il test Wishlist");
 
-        // 2. Recupero dinamico di un formato libro esistente nel DB
-        // Cerchiamo il primo formato attivo, se non c'è prendiamo il primo in assoluto
-        idFormatoValido = formatoR.findAll().stream()
-                .filter(f -> f.getAttivo() != null && f.getAttivo())
-                .findFirst()
-                .map(FormatoLibro::getId)
-                .orElseGet(() -> {
-                    return formatoR.findAll().stream()
-                            .findFirst()
-                            .map(FormatoLibro::getId)
-                            .orElse(null);
-                });
+        Utente u = new Utente();
+        u.setEmail("wishlist_" + System.currentTimeMillis() + "@betabooks.it");
+        u.setPassword("password123");
+        u.setRuolo(RuoloUtente.USER);
+        u.setValidato(true);
+        u = utenteR.saveAndFlush(u);
+        idUtente = u.getId();
 
-        if (idFormatoValido == null) {
-            log.error("ATTENZIONE: Il database dei test non ha FormatoLibro. Il test fallirà.");
-        }
+        Carrello c = new Carrello();
+        c.setUtente(u);
+        carrelloR.saveAndFlush(c);
+
+        Autore a = new Autore();
+        a.setNome("Mario");
+        a.setCognome("Rossi");
+        a.setBiografia("Bio test");
+        a.setNazionalita("Italiana");
+        a = autoreR.saveAndFlush(a);
+
+        Editore e = new Editore();
+        e.setNome("Editore Test");
+        e.setDescrizione("Descrizione test");
+        e = editoreR.saveAndFlush(e);
+
+        Libro l = new Libro();
+        l.setTitolo("Libro Wishlist Test");
+        l.setAutore(a);   
+        l.setEditore(e);  
+        l = libroR.saveAndFlush(l);
+
+        FormatoLibro f1 = new FormatoLibro();
+        f1.setLibro(l);
+        f1.setPrezzo(new BigDecimal("10.00"));
+        f1.setTipoSupporto(TipoSupporto.CARTACEO);
+        f1 = formatoLibroR.saveAndFlush(f1);
+        idFormatoInWishlist = f1.getId();
+
+        FormatoLibro f2 = new FormatoLibro();
+        f2.setLibro(l);
+        f2.setPrezzo(new BigDecimal("15.00")); 
+        f2.setTipoSupporto(TipoSupporto.EBOOK); 
+        f2 = formatoLibroR.saveAndFlush(f2);
+        idFormatoNotInWishlist = f2.getId();
+
+        Wishlist w = new Wishlist();
+        w.setUtente(u);
+        w.setFormatoLibro(f1);
+        w = wishlistR.saveAndFlush(w);
+        idWishlist = w.getId();
     }
 
-    // ── ADD ───────────────────────────────────────────────────────────────────────
+    // ── ADD TO WISHLIST ──────────────────────────────────────────────────────────
 
     @Test
     @Order(1)
     public void addToWishlistSuccesso() {
-        log.debug("TESTING - addToWishlist OK con ID: {}", idFormatoValido);
-        assertNotNull(idFormatoValido, "Impossibile eseguire test: nessun formato libro nel DB");
-        
-        assertEquals(HttpStatus.CREATED,
-                wishlistC.addToWishlist(idUtente, idFormatoValido).getStatusCode());
+        log.debug("TESTING - addToWishlist OK");
+        ResponseEntity<Void> resp = wishlistC.addToWishlist(idUtente, idFormatoNotInWishlist);
+        assertEquals(HttpStatus.CREATED, resp.getStatusCode());
     }
 
     @Test
     @Order(2)
-    public void addToWishlistErrore_UtenteInesistente() {
-        log.debug("TESTING - addToWishlist ERRORE utente inesistente");
-        assertEquals(HttpStatus.BAD_REQUEST,
-                wishlistC.addToWishlist(99999L, idFormatoValido).getStatusCode());
+    public void addToWishlistErrore() {
+        log.debug("TESTING - addToWishlist ERRORE");
+        ResponseEntity<Void> resp = wishlistC.addToWishlist(9999L, 9999L);
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
     }
+
+    // ── REMOVE FROM WISHLIST ─────────────────────────────────────────────────────
 
     @Test
     @Order(3)
-    public void addToWishlistErrore_FormatoInesistente() {
-        log.debug("TESTING - addToWishlist ERRORE formato inesistente");
-        assertEquals(HttpStatus.BAD_REQUEST,
-                wishlistC.addToWishlist(idUtente, 99999L).getStatusCode());
+    public void removeFromWishlistSuccesso() {
+        log.debug("TESTING - removeFromWishlist OK");
+        ResponseEntity<Void> resp = wishlistC.removeFromWishlist(idUtente, idFormatoInWishlist);
+        assertEquals(HttpStatus.NO_CONTENT, resp.getStatusCode());
     }
-
-    // ── IS IN WISHLIST ────────────────────────────────────────────────────────────
 
     @Test
     @Order(4)
-    public void isInWishlistSuccesso_Presente() {
-        log.debug("TESTING - isInWishlist presente");
-        wishlistC.addToWishlist(idUtente, idFormatoValido);
+    public void removeFromWishlistErrore() {
+        log.debug("TESTING - removeFromWishlist ERRORE");
         
-        var resp = wishlistC.isInWishlist(idUtente, idFormatoValido);
-        assertEquals(HttpStatus.OK, resp.getStatusCode());
-        assertTrue((Boolean) resp.getBody());
+        ResponseEntity<Void> resp = wishlistC.removeFromWishlist(null, null);
+        
+        assertEquals(HttpStatus.NO_CONTENT, resp.getStatusCode());
     }
+
+    // ── CONTROLLA IS IN WISHLIST ─────────────────────────────────────────────────
 
     @Test
     @Order(5)
-    public void isInWishlistSuccesso_NonPresente() {
-        log.debug("TESTING - isInWishlist non presente");
-        var resp = wishlistC.isInWishlist(idUtente, idFormatoValido);
+    public void isInWishlist_True() {
+        log.debug("TESTING - isInWishlist TRUE");
+        ResponseEntity<Boolean> resp = wishlistC.isInWishlist(idUtente, idFormatoInWishlist);
         assertEquals(HttpStatus.OK, resp.getStatusCode());
-        assertFalse((Boolean) resp.getBody());
+        assertTrue(resp.getBody());
     }
-
-    // ── GET BY USER ───────────────────────────────────────────────────────────────
 
     @Test
     @Order(6)
-    public void getWishlistByUserSuccesso() {
-        log.debug("TESTING - getWishlistByUser OK");
-        wishlistC.addToWishlist(idUtente, idFormatoValido); // aggiungiamo qualcosa per sicurezza
-        assertEquals(HttpStatus.OK,
-                wishlistC.getWishlistByUser(idUtente).getStatusCode());
+    public void isInWishlist_False() {
+        log.debug("TESTING - isInWishlist FALSE");
+        ResponseEntity<Boolean> resp = wishlistC.isInWishlist(idUtente, idFormatoNotInWishlist);
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+        assertFalse(resp.getBody());
     }
 
     @Test
     @Order(7)
-    public void getWishlistByUserErrore_UtenteInesistente() {
-        log.debug("TESTING - getWishlistByUser con ID inesistente");
-        // Se il tuo controller restituisce 200 con lista vuota invece di 404:
-        var resp = wishlistC.getWishlistByUser(99999L);
-        assertTrue(resp.getStatusCode() == HttpStatus.NOT_FOUND || resp.getStatusCode() == HttpStatus.OK);
+    public void isInWishlistErrore() {
+        log.debug("TESTING - isInWishlist ERRORE");
+        
+        ResponseEntity<Boolean> resp = wishlistC.isInWishlist(null, null);
+        
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+        assertFalse(resp.getBody());
+    }
+
+    // ── GET WISHLIST BY USER ─────────────────────────────────────────────────────
+
+    @Test
+    @Order(8)
+    public void getWishlistByUserSuccesso() {
+        log.debug("TESTING - getWishlistByUser OK");
+        ResponseEntity<List<WishlistDTO>> resp = wishlistC.getWishlistByUser(idUtente);
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+        assertNotNull(resp.getBody());
+        assertFalse(resp.getBody().isEmpty()); 
+    }
+
+    @Test
+    @Order(9)
+    public void getWishlistByUserErrore() {
+        log.debug("TESTING - getWishlistByUser ERRORE");
+        ResponseEntity<List<WishlistDTO>> resp = wishlistC.getWishlistByUser(null);
+        assertEquals(HttpStatus.NOT_FOUND, resp.getStatusCode());
+    }
+
+    // ── PULISCI WISHLIST ─────────────────────────────────────────────────────────
+
+    @Test
+    @Order(10)
+    public void clearWishlistSuccesso() {
+        log.debug("TESTING - clearWishlist OK");
+        ResponseEntity<Void> resp = wishlistC.clearWishlist(idUtente);
+        assertEquals(HttpStatus.NO_CONTENT, resp.getStatusCode());
+    }
+
+    @Test
+    @Order(11)
+    public void clearWishlistErrore() {
+        log.debug("TESTING - clearWishlist ERRORE");
+        ResponseEntity<Void> resp = wishlistC.clearWishlist(null);
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+    }
+
+    // ── SPOSTA NEL CARRELLO ──────────────────────────────────────────────────────
+
+    @Test
+    @Order(12)
+    public void spostaNelCarrelloSuccesso() {
+        log.debug("TESTING - spostaNelCarrello OK");
+        ResponseEntity<String> resp = wishlistC.spostaNelCarrello(idWishlist);
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+    }
+
+    @Test
+    @Order(13)
+    public void spostaNelCarrelloErrore() {
+        log.debug("TESTING - spostaNelCarrello ERRORE");
+        ResponseEntity<String> resp = wishlistC.spostaNelCarrello(99999L);
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
     }
 }
