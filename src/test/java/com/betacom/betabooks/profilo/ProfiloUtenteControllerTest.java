@@ -13,9 +13,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.betacom.betabooks.controllers.ProfiloUtenteController;
-import com.betacom.betabooks.controllers.UtenteController;
 import com.betacom.betabooks.dto.inputs.ProfiloReq;
-import com.betacom.betabooks.dto.inputs.UtenteReq;
+import com.betacom.betabooks.models.ProfiloUtente;
+import com.betacom.betabooks.models.Utente;
+import com.betacom.betabooks.repositories.IProfiloUtenteRepository;
+import com.betacom.betabooks.repositories.IUtenteRepository;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,29 +29,47 @@ public class ProfiloUtenteControllerTest {
 
     @Autowired
     private ProfiloUtenteController profiloC;
+    
+    @Autowired
+    private IProfiloUtenteRepository profiloR;
 
     @Autowired
-    private UtenteController utenteC;
+    private IUtenteRepository utenteR;
 
     // ID creati nel BeforeEach, disponibili in ogni test
     private Long idUtente;
+    private Long idUtenteSenzaProfilo;
     private Long idProfilo;
-/*
+
     @BeforeEach
     void setUp() {
-        // 1. creo un utente fresco
-        UtenteReq uReq = new UtenteReq();
-        uReq.setEmail("profilo_test_" + System.currentTimeMillis() + "@betabooks.it");
-        uReq.setPassword("password123");
-        idUtente = utenteC.register(uReq).getBody().getId();
+        log.debug("Esecuzione setUp: Creazione entità fisse per il test Profilo");
 
-        // 2. creo un profilo associato a quell'utente
-        ProfiloReq pReq = new ProfiloReq();
-        pReq.setIdUtente(idUtente);
-        pReq.setNome("Mario");
-        pReq.setCognome("Rossi");
-        pReq.setTelefono("3331234567");
-        idProfilo = profiloC.create(pReq).getBody();
+        // 1. Crea un utente "A" e il suo Profilo (per testare update, delete, find)
+        Utente u1 = new Utente();
+        u1.setEmail("profilo_con_" + System.currentTimeMillis() + "@betabooks.it");
+        u1.setPassword("password123");
+        u1.setRuolo(com.betacom.betabooks.enums.RuoloUtente.USER);
+        u1.setValidato(false);
+        u1 = utenteR.saveAndFlush(u1);
+        idUtente = u1.getId();
+
+        ProfiloUtente p = new ProfiloUtente();
+        p.setUtente(u1);
+        p.setNome("Mario");
+        p.setCognome("Rossi");
+        p.setTelefono("3331234567");
+        p = profiloR.saveAndFlush(p);
+        idProfilo = p.getId();
+
+        // 2. Crea un utente "B" senza profilo (per testare la create pulita)
+        Utente u2 = new Utente();
+        u2.setEmail("profilo_senza_" + System.currentTimeMillis() + "@betabooks.it");
+        u2.setPassword("password123");
+        u2.setRuolo(com.betacom.betabooks.enums.RuoloUtente.USER);
+        u1.setValidato(false);
+        u2 = utenteR.saveAndFlush(u2);
+        idUtenteSenzaProfilo = u2.getId();
     }
 
     // ── CREATE ───────────────────────────────────────────────────────────────────
@@ -58,20 +78,16 @@ public class ProfiloUtenteControllerTest {
     @Order(1)
     public void createSuccesso() {
         log.debug("TESTING - createProfilo OK");
-        // creo un secondo utente per non avere conflitti
-        UtenteReq uReq = new UtenteReq();
-        uReq.setEmail("profilo2_" + System.currentTimeMillis() + "@betabooks.it");
-        uReq.setPassword("password123");
-        Long altroUtente = utenteC.register(uReq).getBody().getId();
 
         ProfiloReq req = new ProfiloReq();
-        req.setIdUtente(altroUtente);
+        req.setIdUtente(idUtenteSenzaProfilo);
         req.setNome("Luigi");
         req.setCognome("Verdi");
+        req.setTelefono("3339876543");
 
         assertEquals(HttpStatus.CREATED, profiloC.create(req).getStatusCode());
     }
-*/
+
     @Test
     @Order(2)
     public void createErrore_UtenteInesistente() {

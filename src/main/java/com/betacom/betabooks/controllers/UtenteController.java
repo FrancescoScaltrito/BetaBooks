@@ -45,7 +45,7 @@ public class UtenteController {
         this.utS=utS;
     }
 
-   
+
     @PostMapping("/register")
     @SecurityRequirement(name = "") 
     public ResponseEntity<UtenteDTO> register(@RequestBody Registrazione req) {
