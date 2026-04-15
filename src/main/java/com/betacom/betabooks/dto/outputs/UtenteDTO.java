@@ -15,6 +15,6 @@ public class UtenteDTO {
     private Long id;
     private String email;
     private String ruolo;
-    @JsonProperty("validato") // Forza il nome del campo nel JSON
+    @JsonProperty("validato") // forza il nome del campo nel JSON
     private Boolean validato;
 }

@@ -110,17 +110,17 @@ public class OrdineImpl implements IOrdineServices {
         FormatoLibro formato = formatoRepo.findById(itemDto.getIdFormatoLibro())
                 .orElseThrow(() -> new RuntimeException("Libro non trovato: " + itemDto.getTitoloLibro()));
 
-        // Validazione disponibilità generale
+        // validazione disponibilità generale
         if (Boolean.FALSE.equals(formato.getAttivo())) {
             throw new Exception("L'articolo '" + itemDto.getTitoloLibro() + "' non è più disponibile.");
         }
 
-        // Gestione quantità (solo se fisico)
+        // gestione quantità (solo se fisico)
         if (formato.getQuantita() != null) {
             gestisciDecrementoMagazzino(itemDto);
         }
 
-        // Creazione legame Ordine <-> Item
+        // creazione legame Ordine <-> Item
         ordine.getItems().add(costruisciOrdineItem(ordine, itemDto, formato));
         
         log.info("Creazione di un ordineItem: "+ordine.toString());
@@ -222,7 +222,7 @@ public class OrdineImpl implements IOrdineServices {
     @Override
     @Transactional(readOnly = true)
     public List<OrdineDTO> getOrdiniFiltrati(Long idUtente, boolean completati, FiltroTemporale filtro) {
-        // Se il filtro è null (non inviato), di default mostriamo tutto
+        // se il filtro è null (non inviato), di default mostriamo tutto
         FiltroTemporale filtroEffettivo = (filtro != null) ? filtro : FiltroTemporale.TUTTO;
         
         LocalDateTime dataSoglia = filtroEffettivo.getDataInizio();

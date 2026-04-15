@@ -59,10 +59,7 @@ public class EditoreImpl implements IEditoreServices{
 	@Transactional(rollbackFor = Exception.class)
 	@Override
 	public void delete(Long id) throws Exception {
-		/*
-		 *  Da controllare la logica... se elimino un editore cosa succede ai libri che hanno questo editore ?
-		 */
-		
+
 	}
 
 	@Transactional(rollbackFor = Exception.class)

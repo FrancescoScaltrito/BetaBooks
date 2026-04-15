@@ -89,7 +89,7 @@ public class OrdineControllerTest {
     @Autowired
     private IEditoreRepository editoreR;
 
-    // INIETTIAMO L'ENTITY MANAGER PER RISOLVERE IL PROBLEMA DELLA CACHE DI HIBERNATE
+  
     @Autowired
     private EntityManager entityManager;
     
@@ -104,7 +104,6 @@ public class OrdineControllerTest {
     void setUp() {
         log.debug("Esecuzione setUp: Creazione dati fittizi per il test Ordine");
 
-        // 1. Crea Utente
         Utente u = new Utente();
         u.setEmail("ordine_test_" + System.currentTimeMillis() + "@betabooks.it");
         u.setPassword("Password123!");
@@ -120,7 +119,6 @@ public class OrdineControllerTest {
         profilo.setTelefono("3331234567");
         profiloR.saveAndFlush(profilo);
 
-        // 2. Crea Indirizzo di spedizione
         Indirizzo ind = new Indirizzo();
         ind.setUtente(u);
         ind.setVia("Via Roma 1");
@@ -132,7 +130,7 @@ public class OrdineControllerTest {
         ind = indirizzoR.saveAndFlush(ind);
         idIndirizzo = ind.getId();
 
-        // 3. Crea un Ordine pre-esistente nel database
+ 
         Ordine o = new Ordine();
         o.setUtente(u);
         o.setIndirizzo(ind);
@@ -143,7 +141,7 @@ public class OrdineControllerTest {
         o = ordineR.saveAndFlush(o);
         idOrdine = o.getId();
 
-        // 4. Prepara un Carrello PIENO per testare il checkout
+  
         Carrello c = new Carrello();
         c.setUtente(u);
         c = carrelloR.saveAndFlush(c);
@@ -151,12 +149,12 @@ public class OrdineControllerTest {
         Autore a = new Autore();
         a.setNome("Dante");
         a.setCognome("Alighieri");
-        a.setAttivo(true); // <-- RISOLVE L'ERRORE DEL BOOLEAN NULL
+        a.setAttivo(true); 
         a = autoreR.saveAndFlush(a);
 
         Editore e = new Editore();
         e.setNome("Mondadori_" + System.currentTimeMillis());
-        e.setAttivo(true); // <-- RISOLVE L'ERRORE DEL BOOLEAN NULL
+        e.setAttivo(true); 
         e = editoreR.saveAndFlush(e);
 
         Libro l = new Libro();
@@ -167,10 +165,10 @@ public class OrdineControllerTest {
 
         FormatoLibro f = new FormatoLibro();
         f.setLibro(l);
-        f.setPrezzo(BigDecimal.valueOf(15.0)); // Usa setPrezzo o setPrezzoListino a seconda della tua entità
+        f.setPrezzo(BigDecimal.valueOf(15.0)); 
         f.setTipoSupporto(TipoSupporto.CARTACEO);
         f.setQuantita(10); 
-        f.setAttivo(true); // <-- RISOLVE L'ERRORE DEL BOOLEAN NULL
+        f.setAttivo(true);
         f = formatoLibroR.saveAndFlush(f);
 
         CarrelloItem item = new CarrelloItem();
@@ -180,8 +178,7 @@ public class OrdineControllerTest {
         item.setPrezzoUnitario(f.getPrezzo());
         carrelloItemR.saveAndFlush(item);
 
-        // SVUOTIAMO LA CACHE DI HIBERNATE!
-        // Altrimenti il Controller vedrà il carrello come "vuoto" perché legge il vecchio oggetto in memoria
+     
         entityManager.clear();
     }
 

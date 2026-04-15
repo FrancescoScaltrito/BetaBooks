@@ -111,7 +111,6 @@ public class ProfiloUtenteImpl implements IProfiloUtenteServices {
         return toDTO(profilo);
     }
 
-    // ── Metodo privato di mappatura ──────────────────────────────────────────────
     private ProfiloDTO toDTO(ProfiloUtente p) {
         return ProfiloDTO.builder()
                 .id(p.getId())

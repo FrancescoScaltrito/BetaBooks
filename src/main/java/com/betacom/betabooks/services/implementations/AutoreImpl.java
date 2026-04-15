@@ -66,9 +66,7 @@ public class AutoreImpl implements IAutoreServices{
 	@Transactional(rollbackFor = Exception.class)
 	@Override
 	public void delete(Long id) throws Exception {
-		/*
-		 *  Da controllare la logica... se elimino un autore cosa succede ai libri che hanno questo autore ?
-		 */
+	
 	}
 
 	@Transactional(rollbackFor = Exception.class)

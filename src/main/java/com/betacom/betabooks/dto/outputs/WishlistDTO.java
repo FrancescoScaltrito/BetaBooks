@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class WishlistDTO {
     private Long id;
-    private LibroDTO libro; // Restituiamo il dettaglio del libro salvato
+    private LibroDTO libro; 
     private Long formatId;
     private FormatoLibroDTO formato;
 }

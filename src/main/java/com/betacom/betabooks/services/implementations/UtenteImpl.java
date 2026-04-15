@@ -64,50 +64,29 @@ public class UtenteImpl implements IUtenteServices {
 
 	}
 
-	/*
-	@Override
-	public UtenteDTO register(UtenteReq req) {
-		if (utenteRepository.existsByEmail(req.getEmail())) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT, "Email già in uso");
-		}
-
-		Utente utente = new Utente();
-		utente.setEmail(req.getEmail());
-		utente.setPassword(passwordEncoder.encode(req.getPassword()));
-
-		Utente salvato = utenteRepository.save(utente);
-		return toDTO(salvato);
-	}*/
-	
-
 
 	@Transactional
 	public UtenteDTO register(Registrazione req) {
-	    // 1. Controllo duplicati
 	    if (utenteRepository.existsByEmail(req.getEmail())) {
 	        throw new ResponseStatusException(HttpStatus.CONFLICT, "Email già in uso");
 	    }
 
-	    // 2. Crea e salva Utente
 	    Utente utente = new Utente();
 	    utente.setEmail(req.getEmail());
 	    utente.setPassword(passwordEncoder.encode(req.getPassword()));
 	    utente.setValidato(false); 
-	    
-	    // Gestione Ruolo (Default a USER)
+	
 	    String ruoloDaSettare = (req.getRuolo() != null) ? req.getRuolo() : "USER";
 	    utente.setRuolo(RuoloUtente.valueOf(ruoloDaSettare));
 	    
 	    Utente utenteSalvato = utenteRepository.save(utente);
 
-	    // 3. Crea e salva Profilo associato (usando l'utente appena salvato)
 	    ProfiloUtente profilo = new ProfiloUtente();
 	    profilo.setNome(req.getNome());
 	    profilo.setCognome(req.getCognome());
-	    profilo.setUtente(utenteSalvato); // Collegamento tramite JPA
+	    profilo.setUtente(utenteSalvato);
 	    profiloRepo.save(profilo);
 
-	    // 4. Ritorna il DTO dell'utente creato
 	    return toDTO(utenteSalvato);
 	}
 
@@ -145,7 +124,6 @@ public class UtenteImpl implements IUtenteServices {
 		utenteRepository.deleteById(id);
 	}
 
-	// ── Metodo privato di mappatura ──────────────────────────────────────────────
 	private UtenteDTO toDTO(Utente u) {
 		return UtenteDTO.builder().id(u.getId()).email(u.getEmail()).ruolo(u.getRuolo().name())
 				.validato(u.getValidato()).build();
@@ -153,16 +131,15 @@ public class UtenteImpl implements IUtenteServices {
 
 	@Override
 	public Map<String, Object> login(UtenteReq req) {
-		// 1. Autentica l'utente (Spring controlla email e password)
-		// Se le credenziali sono sbagliate, lancia AuthenticationException qui
+
 		Authentication auth = authenticationManager
 				.authenticate(new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword()));
 
-		// 2. Recuperiamo l'utente dal DB
+
 		Utente utente = utenteRepository.findByEmail(req.getEmail())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utente non trovato"));
 
-		// 3. Prepariamo la risposta (Senza Token!)
+
 		Map<String, Object> response = new HashMap<>();
 		response.put("utente", toDTO(utente));
 

@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class RecensioneDTO {
     private Long id;
-    private String nomeUtente; // Es: "Mario R." invece dell'intero oggetto Utente
+    private String nomeUtente; //"Mario R." invece dell'intero oggetto Utente
     private String titoloLibro;
     private Short valutazione;
     private String descrizione;

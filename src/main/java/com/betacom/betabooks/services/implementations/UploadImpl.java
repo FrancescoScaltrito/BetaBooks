@@ -61,7 +61,7 @@ public class UploadImpl implements IUploadServices{
                 .map(name -> name.substring(name.lastIndexOf(".")))
                 .orElse("");
 
-        // Build unique name
+
         String uniqueName =  originalName.substring(0, originalName.lastIndexOf(".")) + "-" +  UUID.randomUUID().toString() + extension;
 
         Path destinationFile = uploadPath.resolve(uniqueName);

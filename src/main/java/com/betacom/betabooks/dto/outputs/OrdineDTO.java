@@ -22,10 +22,6 @@ public class OrdineDTO {
     private StatoOrdine stato;
     private MetodoPagamento metodoPagamento;
     private BigDecimal totaleComplessivo;
-    
-    // Lista dei prodotti acquistati
     private List<OrdineItemDTO> items;
-    
-    // Info sull'indirizzo (opzionale: puoi mettere l'ID o una stringa riassuntiva)
     private String indirizzo;
 }

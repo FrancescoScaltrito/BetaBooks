@@ -48,10 +48,7 @@ public class LibroController {
 
 
 	// Libro
-
 	// METODO OBSOLETO, LO LASCIO NON SI SA MAI
-
-
 	@PutMapping("/update")
 	public ResponseEntity<Resp> update(@RequestBody(required = true) LibroReq req) {
 		log.debug("LibroController - update {}", req);

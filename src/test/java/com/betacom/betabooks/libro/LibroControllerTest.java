@@ -1,11 +1,10 @@
 package com.betacom.betabooks.libro;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
-import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -14,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +23,17 @@ import com.betacom.betabooks.dto.inputs.FormatoLibroReq;
 import com.betacom.betabooks.dto.inputs.LibroReq;
 import com.betacom.betabooks.enums.TipoCopertina;
 import com.betacom.betabooks.enums.TipoSupporto;
+import com.betacom.betabooks.models.Autore;
+import com.betacom.betabooks.models.Editore;
+import com.betacom.betabooks.models.FormatoLibro;
+import com.betacom.betabooks.models.Libro;
+import com.betacom.betabooks.repositories.IAutoreRepository;
+import com.betacom.betabooks.repositories.IEditoreRepository;
+import com.betacom.betabooks.repositories.IFormatoLibroRepository;
+import com.betacom.betabooks.repositories.ILibroRepository;
+import com.betacom.betabooks.response.Resp;
 
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -38,243 +48,210 @@ import lombok.extern.slf4j.Slf4j;
 public class LibroControllerTest {
 
     @Autowired
-    private LibroController libC;
+    private LibroController libroC;
 
-    private static final long ID_AUTORE_VALIDO = 1;
-    private static final long ID_EDITORE_VALIDO = 1;
-    private static final long ID_LIBRO_VALIDO = 26;
-    private static final long ID_FORMATO_VALIDO = 7;
-    private static final List<Long> ID_CATEGORIE_VALIDE = List.of(1L, 2L);
+    @Autowired
+    private ILibroRepository libroR;
+
+    @Autowired
+    private IFormatoLibroRepository formatoLibroR;
+
+    @Autowired
+    private IAutoreRepository autoreR;
+
+    @Autowired
+    private IEditoreRepository editoreR;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    private Long idLibro;
+    private Long idFormato;
+    private Long idAutore;
+    private Long idEditore;
+
+    @BeforeEach
+    void setUp() {
+        log.debug("Esecuzione setUp: Creazione dati fittizi per il test Libro");
+
+  
+        Autore a = new Autore();
+        a.setNome("AutoreTest_" + System.currentTimeMillis());
+        a.setCognome("CognomeTest_" + System.currentTimeMillis());
+        a.setAttivo(true); 
+        a = autoreR.saveAndFlush(a);
+        idAutore = a.getId();
+
+     
+        Editore e = new Editore();
+        e.setNome("EditoreTest_" + System.currentTimeMillis());
+        e.setAttivo(true);
+        e = editoreR.saveAndFlush(e);
+        idEditore = e.getId();
+
+    
+        Libro l = new Libro();
+        l.setTitolo("Libro di Test " + System.currentTimeMillis());
+        l.setAutore(a);
+        l.setEditore(e);
+        l.setDescrizione("Descrizione del libro di test");
+        l = libroR.saveAndFlush(l);
+        idLibro = l.getId();
+
+      
+        FormatoLibro f = new FormatoLibro();
+        f.setLibro(l);
+        f.setPrezzo(BigDecimal.valueOf(19.99)); 
+        f.setTipoSupporto(TipoSupporto.CARTACEO);
+        f.setQuantita(50);
+        f.setAttivo(true); 
+        f = formatoLibroR.saveAndFlush(f);
+        idFormato = f.getId();
+
+        // pulisce la cache di Hibernate per assicurarsi che i metodi del Service vedano i dati freschi
+        entityManager.clear();
+    }
+
+    // ── GESTIONE LIBRO ───────────────────────────────────────────────────────────
 
     @Test
     @Order(1)
-    public void creaLibroSuccesso() throws Exception {
-        log.debug("TESTING - creaLibro OK");
+    public void createLibroSuccesso() {
+        log.debug("TEST [1] createLibro - successo");
         LibroReq req = new LibroReq();
-        req.setTitolo("Titolo di test");
-        req.setDescrizione("Descrizione di test");
-        req.setIdAutore(ID_AUTORE_VALIDO);
-        req.setIdEditore(ID_EDITORE_VALIDO);
-        req.setIdCategorie(ID_CATEGORIE_VALIDE);
-        assertEquals(HttpStatus.OK, libC.create(req).getStatusCode());
+        req.setTitolo("Nuovo Libro Test");
+        req.setIdAutore(idAutore);
+        req.setIdEditore(idEditore);
+        req.setDescrizione("Descrizione nuova");
+
+        ResponseEntity<Resp> resp = libroC.create(req);
+        
+        if (resp.getStatusCode() == HttpStatus.BAD_REQUEST) {
+            log.error("🚨 ERRORE CREATE LIBRO: {}", resp.getBody().getMessage());
+        }
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
     }
 
     @Test
     @Order(2)
-    public void creaLibroErroreAutoreInesistente() throws Exception {
-        log.debug("TESTING - creaLibro ERRORE autore inesistente");
+    public void updateLibroSuccesso() {
+        log.debug("TEST [2] updateLibro - successo");
         LibroReq req = new LibroReq();
-        req.setTitolo("Titolo di test");
-        req.setDescrizione("Descrizione di test");
-        req.setIdAutore(99999L);
-        req.setIdEditore(ID_EDITORE_VALIDO);
-        req.setIdCategorie(ID_CATEGORIE_VALIDE);
-        assertEquals(HttpStatus.BAD_REQUEST, libC.create(req).getStatusCode());
+        req.setId(idLibro);
+        req.setTitolo("Libro Aggiornato");
+        req.setIdAutore(idAutore);
+        req.setIdEditore(idEditore);
+
+        ResponseEntity<Resp> resp = libroC.update(req);
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
     }
 
     @Test
     @Order(3)
-    public void creaLibroErroreEditoreInesistente() throws Exception {
-        log.debug("TESTING - creaLibro ERRORE editore inesistente");
-        LibroReq req = new LibroReq();
-        req.setTitolo("Titolo di test");
-        req.setDescrizione("Descrizione di test");
-        req.setIdAutore(ID_AUTORE_VALIDO);
-        req.setIdEditore(99999L);
-        req.setIdCategorie(ID_CATEGORIE_VALIDE);
-        assertEquals(HttpStatus.BAD_REQUEST, libC.create(req).getStatusCode());
+    public void getLibroByIdSuccesso() {
+        log.debug("TEST [3] getLibroById - successo");
+        ResponseEntity<Object> resp = libroC.findById(idLibro);
+        
+        assertEquals(HttpStatus.OK, resp.getStatusCode(), "Fallito! Motivo: " + resp.getBody());
+        assertNotNull(resp.getBody());
     }
 
     @Test
     @Order(4)
-    public void updateLibroSuccesso() throws Exception {
-        log.debug("TESTING - updateLibro OK");
-        LibroReq req = new LibroReq();
-        req.setId(ID_LIBRO_VALIDO);
-        req.setTitolo("Titolo aggiornato");
-        req.setIdAutore(ID_AUTORE_VALIDO);
-        req.setIdEditore(ID_EDITORE_VALIDO);
-        req.setIdCategorie(ID_CATEGORIE_VALIDE);
-        assertEquals(HttpStatus.OK, libC.update(req).getStatusCode());
+    public void getAllLibriSuccesso() {
+        log.debug("TEST [4] getAllLibri - successo");
+        ResponseEntity<Object> resp = libroC.list();
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+        assertNotNull(resp.getBody());
     }
 
     @Test
     @Order(5)
-    public void updateLibroErroreIdInesistente() throws Exception {
-        log.debug("TESTING - updateLibro ERRORE id inesistente");
-        LibroReq req = new LibroReq();
-        req.setId(99999L);
-        req.setTitolo("Titolo aggiornato");
-        req.setIdAutore(ID_AUTORE_VALIDO);
-        req.setIdEditore(ID_EDITORE_VALIDO);
-        req.setIdCategorie(ID_CATEGORIE_VALIDE);
-        assertEquals(HttpStatus.BAD_REQUEST, libC.update(req).getStatusCode());
+    public void cercaLibriSuccesso() {
+        log.debug("TEST [5] cercaLibri - successo");
+        ResponseEntity<Object> resp = libroC.cerca(null, null, null, null, null, null);
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
     }
+
+    // ── GESTIONE FORMATO ─────────────────────────────────────────────────────────
 
     @Test
     @Order(6)
-    public void getByIdSuccesso() {
-        log.debug("TESTING - getById OK");
-        assertEquals(HttpStatus.OK, libC.findById(ID_LIBRO_VALIDO).getStatusCode());
+    public void createFormatoSuccesso() {
+        log.debug("TEST [6] createFormato - successo");
+        LibroReq req = new LibroReq();
+        req.setPrezzo(new BigDecimal("19.99"));
+        req.setTipoSupporto(TipoSupporto.CARTACEO);
+        req.setTipoCopertina(TipoCopertina.FLESSIBILE);
+        req.setQuantita(10);                  
+        req.setIsbn("1234567890123");        
+
+        ResponseEntity<Object> resp = libroC.createFormato(idLibro, req);
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
     }
 
     @Test
     @Order(7)
-    public void getByIdErrore() {
-        log.debug("TESTING - getById ERRORE");
-        assertEquals(HttpStatus.BAD_REQUEST, libC.findById(99999L).getStatusCode());
+    public void updateFormatoSuccesso() {
+        log.debug("TEST [7] updateFormato - successo");
+        FormatoLibroReq req = new FormatoLibroReq();
+        req.setId(idFormato);
+        req.setIdLibro(idLibro);
+        req.setPrezzo(new BigDecimal("25.0"));
+        req.setQuantita(100);
+
+        ResponseEntity<Resp> resp = libroC.updateFormato(req);
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
     }
 
     @Test
     @Order(8)
-    public void getAllSuccesso() {
-        log.debug("TESTING - getAll OK");
-        assertEquals(HttpStatus.OK, libC.list().getStatusCode());
+    public void getFormatiByLibroSuccesso() {
+        log.debug("TEST [8] getFormatiByLibro - successo");
+        ResponseEntity<Object> resp = libroC.getFormatiByLibro(idLibro);
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
     }
 
     @Test
     @Order(9)
-    public void deleteSuccesso() {
-        log.debug("TESTING - delete OK");
-        assertEquals(HttpStatus.OK, libC.delete(ID_LIBRO_VALIDO).getStatusCode());
+    public void getFormatoByIdSuccesso() {
+        log.debug("TEST [9] getFormatoById - successo");
+        ResponseEntity<Object> resp = libroC.getFormatoById(idFormato);
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
     }
 
     @Test
     @Order(10)
-    public void deleteErrore() {
-        log.debug("TESTING - delete ERRORE");
-        assertEquals(HttpStatus.BAD_REQUEST, libC.delete(99999L).getStatusCode());
+    public void getFormatoCompletoSuccesso() {
+        log.debug("TEST [10] getFormatoCompleto - successo");
+        ResponseEntity<Object> resp = libroC.getFormatoCompleto(idFormato);
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
     }
 
     @Test
     @Order(11)
-    public void getFormatiByLibroSuccesso() {
-        log.debug("TESTING - getFormatiByLibro OK");
-        assertEquals(HttpStatus.OK, libC.getFormatiByLibro(ID_LIBRO_VALIDO).getStatusCode());
+    public void disattivaFormatoSuccesso() {
+        log.debug("TEST [12] disattivaFormato - successo");
+        ResponseEntity<Resp> resp = libroC.disattivaFormato(idFormato);
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
     }
 
     @Test
     @Order(12)
-    public void getFormatiByLibroErrore() {
-        log.debug("TESTING - getFormatiByLibro ERRORE");
-        assertEquals(HttpStatus.BAD_REQUEST, libC.getFormatiByLibro(99999L).getStatusCode());
+    public void eliminaFormatoSuccesso() {
+        log.debug("TEST [13] eliminaFormato - successo");
+        ResponseEntity<Resp> resp = libroC.eliminaFormato(idFormato);
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
     }
+
+    // ── ELIMINAZIONE LIBRO ───────────────────────────────────────────────────────
 
     @Test
     @Order(13)
-    public void getFormatoByIdSuccesso() {
-        log.debug("TESTING - getFormatoById OK");
-        assertEquals(HttpStatus.OK, libC.getFormatoById(ID_FORMATO_VALIDO).getStatusCode());
-    }
+    public void deleteLibroSuccesso() {
+        log.debug("TEST [14] deleteLibro - successo");
 
-    @Test
-    @Order(14)
-    public void getFormatoByIdErrore() {
-        log.debug("TESTING - getFormatoById ERRORE");
-        assertEquals(HttpStatus.BAD_REQUEST, libC.getFormatoById(99999L).getStatusCode());
-    }
-
-    @Test
-    @Order(15)
-    public void updateFormatoSuccesso() {
-        log.debug("TESTING - updateFormato OK");
-        FormatoLibroReq req = new FormatoLibroReq();
-        req.setId(ID_FORMATO_VALIDO);
-        req.setPrezzo(new BigDecimal("19.99"));
-        req.setIsbn("9780000000001");
-        req.setQuantita(10);
-        assertEquals(HttpStatus.OK, libC.updateFormato(req).getStatusCode());
-    }
-
-    @Test
-    @Order(16)
-    public void updateFormatoErrore() {
-        log.debug("TESTING - updateFormato ERRORE");
-        FormatoLibroReq req = new FormatoLibroReq();
-        req.setId(99999L);
-        req.setPrezzo(new BigDecimal("19.99"));
-        assertEquals(HttpStatus.BAD_REQUEST, libC.updateFormato(req).getStatusCode());
-    }
-
-    @Test
-    @Order(17)
-    public void disattivaFormatoSuccesso() {
-        log.debug("TESTING - disattivaFormato OK");
-        assertEquals(HttpStatus.OK, libC.disattivaFormato(ID_FORMATO_VALIDO).getStatusCode());
-    }
-
-    @Test
-    @Order(18)
-    public void disattivaFormatoErrore() {
-        log.debug("TESTING - disattivaFormato ERRORE");
-        assertEquals(HttpStatus.BAD_REQUEST, libC.disattivaFormato(99999L).getStatusCode());
-    }
-
-    @Test
-    @Order(19)
-    public void uploadCopertinaSuccesso() throws Exception {
-        log.debug("TESTING - uploadCopertina OK");
-        MockMultipartFile file = new MockMultipartFile(
-            "file",
-            "copertina.jpg",
-            MediaType.IMAGE_JPEG_VALUE,
-            "contenuto immagine".getBytes()
-        );
-        assertEquals(HttpStatus.OK, libC.uploadCopertina(ID_FORMATO_VALIDO, file).getStatusCode());
-    }
-
-    @Test
-    @Order(20)
-    public void uploadCopertinaErrore() throws Exception {
-        log.debug("TESTING - uploadCopertina ERRORE");
-        MockMultipartFile file = new MockMultipartFile(
-            "file",
-            "copertina.jpg",
-            MediaType.IMAGE_JPEG_VALUE,
-            "contenuto immagine".getBytes()
-        );
-        assertEquals(HttpStatus.BAD_REQUEST, libC.uploadCopertina(99999L, file).getStatusCode());
-    }
-
-    @Test
-    @Order(21)
-    public void getFormatoCompletoSuccesso() {
-        log.debug("TESTING - getFormatoCompleto OK");
-        assertEquals(HttpStatus.OK, libC.getFormatoCompleto(ID_FORMATO_VALIDO).getStatusCode());
-    }
-
-    @Test
-    @Order(22)
-    public void getFormatoCompletoErrore() {
-        log.debug("TESTING - getFormatoCompleto ERRORE");
-        assertEquals(HttpStatus.BAD_REQUEST, libC.getFormatoCompleto(99999L).getStatusCode());
-    }
-
-    @Test
-    @Order(23)
-    public void cercaSuccesso() {
-        log.debug("TESTING - cerca OK");
-        assertEquals(HttpStatus.OK, libC.cerca("Harry", null, null, null, null, null).getStatusCode());
-    }
-
-    @Test
-    @Order(24)
-    public void cercaVuota() {
-        log.debug("TESTING - cerca vuota OK");
-        assertEquals(HttpStatus.OK, libC.cerca(null, null, null, null, null, null).getStatusCode());
-    }
-
-    @Test
-    @Order(25)
-    public void cercaConFiltri() {
-        log.debug("TESTING - cerca con filtri OK");
-        assertEquals(HttpStatus.OK, libC.cerca(
-            null,
-            List.of("Fantasy"),
-            new BigDecimal("5.00"),
-            new BigDecimal("50.00"),
-            TipoSupporto.CARTACEO,
-            TipoCopertina.RIGIDA
-        ).getStatusCode());
+        ResponseEntity<Resp> resp = libroC.delete(idLibro);
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
     }
 }

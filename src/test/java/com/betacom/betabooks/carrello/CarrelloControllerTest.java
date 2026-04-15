@@ -233,8 +233,6 @@ public class CarrelloControllerTest {
     @Order(11)
     public void rimuoviItemSuccesso() throws Exception {
         log.debug("TEST [11] rimuoviItem - successo");
-        // Devo assicurarmi di avere un item valido, potrebbe essere stato spostato dal test 9
-        // ma essendo `@Transactional` il DB si resetta ad ogni test!
         ResponseEntity<Resp> resp = carrelloC.rimuoviItem(idCarrelloItem);
         assertEquals(HttpStatus.OK, resp.getStatusCode());
     }

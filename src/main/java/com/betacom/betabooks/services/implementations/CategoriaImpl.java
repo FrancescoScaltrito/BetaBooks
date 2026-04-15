@@ -53,9 +53,7 @@ public class CategoriaImpl implements ICategoriaServices{
 
 	@Override
 	public void delete(Long id) throws Exception {
-		/*
-		 *  Da controllare la logica... se elimino una categoria cosa succede ai libri collegati?
-		 */
+
 		
 	}
 

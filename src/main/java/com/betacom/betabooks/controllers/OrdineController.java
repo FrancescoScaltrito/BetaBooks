@@ -135,7 +135,6 @@ public class OrdineController {
         
         Resp r = new Resp();
         try {
-            // Se 'periodo' non viene passato, nel service sarà gestito come TUTTO
             List<OrdineDTO> ordini = ordineService.getOrdiniFiltrati(idUtente, completati, periodo);
             
             r.setObj(ordini);

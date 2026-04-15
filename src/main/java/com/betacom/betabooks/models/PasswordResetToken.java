@@ -34,7 +34,6 @@ public class PasswordResetToken {
     @Column(nullable = false)
     private LocalDateTime dataScadenza;
 
-    // Costruttori, Getter e Setter
     public PasswordResetToken() {}
 
     public PasswordResetToken(String token, Utente utente, int minutiScadenza) {

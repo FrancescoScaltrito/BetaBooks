@@ -18,33 +18,33 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/audit")
 public class AuditLogController {
 
-    private final IAuditLogServices auditS;
+	private final IAuditLogServices auditS;
 
-    @GetMapping("/getAll")
-    public ResponseEntity<Object> list(){
-        Object response;
-        HttpStatus status = HttpStatus.OK;
-        try {
-            response = auditS.findAll();
-        } catch (Exception e) {
-            log.error("ERRORE AuditLogController - getAll: " + e.getMessage());
-            response = e.getMessage();
-            status = HttpStatus.BAD_REQUEST;
-        }
-        return ResponseEntity.status(status).body(response);    
-    }
+	@GetMapping("/getAll")
+	public ResponseEntity<Object> list() {
+		Object response;
+		HttpStatus status = HttpStatus.OK;
+		try {
+			response = auditS.findAll();
+		} catch (Exception e) {
+			log.error("ERRORE AuditLogController - getAll: " + e.getMessage());
+			response = e.getMessage();
+			status = HttpStatus.BAD_REQUEST;
+		}
+		return ResponseEntity.status(status).body(response);
+	}
 
-    @GetMapping("/getByTabella")
-    public ResponseEntity<Object> findByTabella(@RequestParam(required = true) String nomeTabella){
-        Object response;
-        HttpStatus status = HttpStatus.OK;
-        try {
-            response = auditS.findByTabella(nomeTabella);
-        } catch (Exception e) {
-            log.error("ERRORE AuditLogController - findByTabella: " + e.getMessage());
-            response = e.getMessage();
-            status = HttpStatus.BAD_REQUEST; 
-        }
-        return ResponseEntity.status(status).body(response);
-    }
+	@GetMapping("/getByTabella")
+	public ResponseEntity<Object> findByTabella(@RequestParam(required = true) String nomeTabella) {
+		Object response;
+		HttpStatus status = HttpStatus.OK;
+		try {
+			response = auditS.findByTabella(nomeTabella);
+		} catch (Exception e) {
+			log.error("ERRORE AuditLogController - findByTabella: " + e.getMessage());
+			response = e.getMessage();
+			status = HttpStatus.BAD_REQUEST;
+		}
+		return ResponseEntity.status(status).body(response);
+	}
 }

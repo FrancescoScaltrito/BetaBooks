@@ -32,7 +32,7 @@ public interface IFormatoLibroRepository extends JpaRepository<FormatoLibro, Lon
     @Query("UPDATE FormatoLibro f SET f.quantita = f.quantita - :q " +
            "WHERE f.id = :id AND f.quantita >= :q")
     int decrementaSeDisponibile(@Param("id") Long id, @Param("q") int q);
-    //Se restituisce 1, lo scalo è avvenuto. Se restituisce 0, significa che nel frattempo qualcuno ha comprato i libri e non ce n'erano a sufficienza (Hard Check fallito).
+    //se restituisce 1, lo scalo è avvenuto. Se restituisce 0, significa che nel frattempo qualcuno ha comprato i libri e non ce n'erano a sufficienza (Hard Check fallito).
 
     @Modifying
     @Transactional

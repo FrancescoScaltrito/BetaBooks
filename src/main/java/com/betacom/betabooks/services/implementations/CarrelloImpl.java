@@ -99,15 +99,13 @@ public class CarrelloImpl implements ICarrelloServices {
        if (itemGiaPresente.isPresent()) {
            quantitaLibriRichiesta += itemGiaPresente.get().getQuantita();
        }
-       
-       // Controllo disponibilità magazzino (solo per fisici, perché null != null è gestito sopra)
+
        if (formato.getQuantita() != null) {
            if (formato.getQuantita() < quantitaLibriRichiesta) {
                throw new Exception("Quantità non disponibile. Disponibili solo: " + formato.getQuantita() + " pezzi");
            }
        }
        
-       // Aggiunta o Aggiornamento reale
        if (itemGiaPresente.isPresent()) {
            log.debug("Aumento quantità nel carrello");   
            CarrelloItem item = itemGiaPresente.get();

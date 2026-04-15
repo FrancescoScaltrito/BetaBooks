@@ -49,7 +49,7 @@ public class IndirizzoControllerTest {
     void setUp() {
         log.debug("=== setUp: creazione dati fittizi ===");
 
-        // ── 1. Crea utente con Registrazione ────────────────────────────────────
+
         Registrazione uReq = new Registrazione();
         uReq.setEmail("test_" + System.currentTimeMillis() + "@betabooks.it");
         uReq.setPassword("Password123!");
@@ -66,7 +66,7 @@ public class IndirizzoControllerTest {
         idUtente = resUtente.getBody().getId();
         log.debug("setUp: utente creato con ID={}", idUtente);
 
-        // ── 2. Crea indirizzo fittizio ───────────────────────────────────────────
+  
         IndirizzoReq iReq = buildReq(idUtente);
         iReq.setIsDefault(true);
 
@@ -78,7 +78,6 @@ public class IndirizzoControllerTest {
         log.debug("setUp: indirizzo creato con ID={}", idIndirizzo);
     }
 
-    // ── helper ───────────────────────────────────────────────────────────────────
 
     private IndirizzoReq buildReq(Long idUtente) {
         IndirizzoReq req = new IndirizzoReq();
@@ -93,8 +92,7 @@ public class IndirizzoControllerTest {
         return req;
     }
 
-    // ── TEST ─────────────────────────────────────────────────────────────────────
-
+  
     @Test
     @Order(1)
     public void createSuccesso() {

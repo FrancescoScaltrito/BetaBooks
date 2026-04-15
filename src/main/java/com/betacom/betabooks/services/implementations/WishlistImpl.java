@@ -133,7 +133,7 @@ public class WishlistImpl implements IWishlistServices {
         
         FormatoLibroDTO formatoDTO = FormatoLibroDTO.builder()
                 .id(formato.getId())
-                .copertina(formato.getCopertina()) // L'immagine viene presa correttamente dal formato
+                .copertina(formato.getCopertina()) 
                 .prezzo(formato.getPrezzo())
                 .tipoSupporto(formato.getTipoSupporto())
                 .build();
@@ -142,7 +142,7 @@ public class WishlistImpl implements IWishlistServices {
                 .id(w.getId())
                 .formatId(formato.getId())
                 .libro(libroDTO)
-                .formato(formatoDTO) // Il formato viene aggiunto al DTO
+                .formato(formatoDTO)
                 .build();
     }
 

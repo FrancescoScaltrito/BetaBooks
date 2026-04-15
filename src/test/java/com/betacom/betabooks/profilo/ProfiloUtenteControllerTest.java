@@ -42,7 +42,6 @@ public class ProfiloUtenteControllerTest {
     @Autowired
     private IUtenteRepository utenteR;
 
-    // ID creati nel BeforeEach, disponibili in ogni test
     private Long idUtente;
     private Long idUtenteSenzaProfilo;
     private Long idProfilo;
@@ -51,7 +50,6 @@ public class ProfiloUtenteControllerTest {
     void setUp() {
         log.debug("Esecuzione setUp: Creazione entità fisse per il test Profilo");
 
-        // 1. Crea un utente "A" e il suo Profilo (per testare update, delete, find)
         Utente u1 = new Utente();
         u1.setEmail("profilo_con_" + System.currentTimeMillis() + "@betabooks.it");
         u1.setPassword("password123");
@@ -68,7 +66,6 @@ public class ProfiloUtenteControllerTest {
         p = profiloR.saveAndFlush(p);
         idProfilo = p.getId();
 
-        // 2. Crea un utente "B" senza profilo (per testare la create pulita)
         Utente u2 = new Utente();
         u2.setEmail("profilo_senza_" + System.currentTimeMillis() + "@betabooks.it");
         u2.setPassword("password123");
@@ -111,7 +108,7 @@ public class ProfiloUtenteControllerTest {
     public void createErrore_DatiMancanti() {
         log.debug("TESTING - createProfilo ERRORE dati null");
         ProfiloReq req = new ProfiloReq();
-        // nessun campo valorizzato
+
 
         assertEquals(HttpStatus.BAD_REQUEST, profiloC.create(req).getStatusCode());
     }

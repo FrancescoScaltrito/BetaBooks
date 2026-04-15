@@ -3,22 +3,17 @@ package com.betacom.betabooks.controllers;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.betacom.betabooks.dto.inputs.UtenteReq;
 import com.betacom.betabooks.dto.outputs.UtenteDTO;
 import com.betacom.betabooks.models.Utente;
 import com.betacom.betabooks.repositories.IUtenteRepository;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -60,7 +55,7 @@ public class AuthController {
         }  
         catch (AuthenticationException e) {
             System.out.println("--- ERRORE AUTENTICAZIONE: " + e.getMessage());
-            e.printStackTrace(); // <--- QUESTO CI DICE TUTTO
+            e.printStackTrace(); 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }*/

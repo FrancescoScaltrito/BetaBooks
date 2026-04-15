@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CarrelloReq { //contiene tutto ciò che serve per la creazione del carrello: dati che il frontend invia al backend
+public class CarrelloReq { 
 	private Long idUtente; 
     private Long idFormatoLibro;  
     private Integer quantita;

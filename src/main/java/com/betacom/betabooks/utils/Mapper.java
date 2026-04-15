@@ -136,26 +136,12 @@ public class Mapper {
     /*
      * CARRELLO ITEM
      */
-    /*
-    public static CarrelloItemDTO buildCarrelloItemDTO(CarrelloItem item) {
-        BigDecimal prezzoStorico = item.getPrezzoUnitario();
-        BigDecimal subTotale = prezzoStorico.multiply(new BigDecimal(item.getQuantita()));
-
-        return CarrelloItemDTO.builder()
-                .id(item.getId())
-                .idFormatoLibro(item.getFormatoLibro().getId())
-                .titoloLibro(item.getFormatoLibro().getLibro().getTitolo())
-                .prezzoUnitario(prezzoStorico)
-                .quantita(item.getQuantita())
-                .prezzoTotaleRiga(subTotale)
-                .build();
-    }*/
+    
     
     public static CarrelloItemDTO buildCarrelloItemDTO(CarrelloItem item) {
         BigDecimal prezzoStorico = item.getPrezzoUnitario();
         BigDecimal subTotale = prezzoStorico.multiply(new BigDecimal(item.getQuantita()));
-        
-        // Recuperiamo il libro e le relazioni necessarie
+   
         Libro libro = item.getFormatoLibro().getLibro();
 
         return CarrelloItemDTO.builder()
@@ -166,7 +152,7 @@ public class Mapper {
                 .autoreNome(libro.getAutore().getNome())
                 .autoreCognome(libro.getAutore().getCognome())
                 .editoreNome(libro.getEditore().getNome())
-                .copertina(item.getFormatoLibro().getCopertina()) // Assicurati che nel modello Libro ci sia il percorso dell'immagine
+                .copertina(item.getFormatoLibro().getCopertina())
                 .prezzoUnitario(prezzoStorico)
                 .quantita(item.getQuantita())
                 .prezzoTotaleRiga(subTotale)
@@ -179,12 +165,11 @@ public class Mapper {
      * CARRELLO COMPLETO
      */
     public static CarrelloDTO buildCarrelloDTO(Carrello c) {
-        // Trasformiamo la lista di items usando il metodo sopra
+
         List<CarrelloItemDTO> itemDTOs = c.getItems().stream()
                 .map(Mapper::buildCarrelloItemDTO)
                 .collect(Collectors.toList());
 
-        // Calcoliamo il totale complessivo
         BigDecimal totaleGenerale = itemDTOs.stream()
                 .map(CarrelloItemDTO::getPrezzoTotaleRiga)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -201,7 +186,7 @@ public class Mapper {
      * ORDINE ITEM
      */
     public static OrdineItemDTO buildOrdineItemDTO(OrdineItem item) {
-        // Il subtotale per la riga d'ordine
+        // il subtotale per la riga d'ordine
         BigDecimal subtotale = item.getPrezzoUnitarioAcquisto()
                 .multiply(new BigDecimal(item.getQuantita()));
 
@@ -222,12 +207,11 @@ public class Mapper {
      * ORDINE COMPLETO
      */
     public static OrdineDTO buildOrdineDTO(Ordine o) {
-        // Trasformiamo la lista di items dell'entità in DTO
+
         List<OrdineItemDTO> itemDTOs = o.getItems().stream()
                 .map(Mapper::buildOrdineItemDTO)
                 .collect(Collectors.toList());
 
-        // Calcoliamo il totale dell'ordine (somma dei subtotali)
         BigDecimal totaleOrdine = itemDTOs.stream()
                 .map(OrdineItemDTO::getSubtotale)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -258,7 +242,7 @@ public class Mapper {
      * RECENSIONI
      */
     public static RecensioneDTO buildRecensioneDTO(Recensione r) {
-    	//Formatta il nome dell'utente se è presente
+ 
     	String nomeUtente = "Utente sconosciuto";
     	if (r.getProfiloUtente() != null) {
     		String nome = r.getProfiloUtente().getNome() != null ? r.getProfiloUtente().getNome() : "";
@@ -286,27 +270,13 @@ public class Mapper {
     /*
      * AUDIT LOG
      */
-    /*
-    public static AuditLogDTO buildAuditLogDTO(AuditLog a) {
-        return AuditLogDTO.builder()
-                .id(a.getId())
-                .nomeTabella(a.getNomeTabella())
-                .tipoOperazione(a.getTipoOperazione())
-                .idModificato(a.getIdModificato())
-                .valoriPrecedenti(a.getValoriPrecedenti())
-                .valoriNuovi(a.getValoriNuovi())
-                .utenteDb(a.getUtenteDb())
-                .dataModifica(a.getDataModifica())
-                .build();
-    }*/
-    
-    //nuovo metodo per non far visualizzare le password all'admin lato frontend
+   
     public static AuditLogDTO buildAuditLogDTO(AuditLog a) {
         // clono le mappe per non modificare l'entità originale nel DB
         Map<String, Object> prev = a.getValoriPrecedenti() != null ? new HashMap<>(a.getValoriPrecedenti()) : null;
         Map<String, Object> next = a.getValoriNuovi() != null ? new HashMap<>(a.getValoriNuovi()) : null;
 
-        // Se è la tabella "utenti", nascondiamo la password
+        // se è la tabella "utenti", nascondiamo la password
         if ("utenti".equalsIgnoreCase(a.getNomeTabella())) {
             if (prev != null) prev.remove("password");
             if (next != null) next.remove("password");

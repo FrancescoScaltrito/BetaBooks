@@ -12,14 +12,14 @@ import com.betacom.betabooks.models.Ordine;
 @Repository
 public interface IOrdineRepository extends JpaRepository<Ordine, Long>{
 	
-	// Recupera la lista di ordini di un utente, ordinati dal più recente al più vecchio
+
     List<Ordine> findByUtenteIdOrderByDataOrdineDesc(Long idUtente);
         
     // Per gli ordini COMPLETATI (Stato = CONSEGNATO) dopo una certa data
     List<Ordine> findByUtenteIdAndStatoAndDataOrdineAfterOrderByDataOrdineDesc(
             Long idUtente, StatoOrdine stato, LocalDateTime data);
 
-    // Per gli ordini NON COMPLETATI (Stato != CONSEGNATO) dopo una certa data
+    // Per gli ordini non completati (Stato != CONSEGNATO) dopo una certa data
     List<Ordine> findByUtenteIdAndStatoNotAndDataOrdineAfterOrderByDataOrdineDesc(
             Long idUtente, StatoOrdine stato, LocalDateTime data);
 

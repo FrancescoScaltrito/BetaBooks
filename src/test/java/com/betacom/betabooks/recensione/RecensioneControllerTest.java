@@ -67,7 +67,7 @@ public class RecensioneControllerTest {
 
     @BeforeEach
     void setUp() {
-        // ── Cerca un OrdineItem CONSEGNATO già esistente nel DB ──────────────────
+   
         List<OrdineItem> items = ordineItemR.findAll();
         OrdineItem itemValido = null;
 
@@ -79,7 +79,7 @@ public class RecensioneControllerTest {
         }
 
         if (itemValido == null && !items.isEmpty()) {
-            // Se non c'è nessun ordine CONSEGNATO, prendo il primo e lo forzo
+        
             itemValido = items.get(0);
             Ordine ordine = itemValido.getOrdine();
             ordine.setStato(StatoOrdine.CONSEGNATO);
@@ -90,7 +90,7 @@ public class RecensioneControllerTest {
             idUtenteReale = itemValido.getOrdine().getUtente().getId();
             idLibroReale   = itemValido.getFormatoLibro().getLibro().getId();
 
-            // Rimuove recensione esistente per lo stesso utente+libro
+            // rimuove recensione esistente per lo stesso utente+libro
             // così createSuccess() non fallisce per unicità
             recensioneR.findByProfiloUtenteIdAndLibro_Id(idUtenteReale, idLibroReale)
                 .ifPresent(r -> {
@@ -99,7 +99,6 @@ public class RecensioneControllerTest {
                 });
         }
 
-        // ── Cerca una recensione esistente per i test di update/delete/getById ──
         List<Recensione> recensioni = recensioneR.findAll();
         if (!recensioni.isEmpty()) {
             idRecensioneReale = recensioni.get(0).getId();
@@ -278,18 +277,16 @@ public class RecensioneControllerTest {
     public void createFailure_RecensioneGiaEsistente() {
         log.debug("Test: Creazione fallita - Recensione già esistente");
 
-        // Verifichiamo che ci sia almeno una recensione nel DB da usare come test
         if (idRecensioneReale == null) {
             log.warn("Nessuna recensione disponibile, test saltato");
             return;
         }
 
-        // Recuperiamo i dati della recensione esistente
         Recensione esistente = recensioneR.findById(idRecensioneReale).get();
         Long idUtente = esistente.getProfiloUtente().getId();
         Long idLibro  = esistente.getLibro().getId();
 
-        // Prepariamo una richiesta per lo stesso utente e lo stesso libro
+       
         RecensioneReq req = new RecensioneReq();
         req.setIdUtente(idUtente);
         req.setIdLibro(idLibro);
@@ -298,11 +295,10 @@ public class RecensioneControllerTest {
 
         ResponseEntity<Resp> resp = recensioneC.create(req);
 
-        // Verifichiamo che il server risponda con BAD_REQUEST
+       
         assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
         
-        // NOTA: Il sistema restituisce il messaggio relativo all'ordine perché quella 
-        // validazione viene eseguita prima del controllo sui duplicati.
+   
         assertEquals("Non puoi inserire una recensione per un libro non acquistato o non consegnato!", 
                      resp.getBody().getMessage());
     }

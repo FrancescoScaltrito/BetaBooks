@@ -30,7 +30,11 @@ import com.betacom.betabooks.profilo.ProfiloUtenteControllerTest;
     WishlistControllerTest.class,
     ProfiloUtenteControllerTest.class
 })
-
+@TestPropertySource(properties = {
+	    "database.username=postgres",
+	    "database.password=100720",
+	    "mail.sender=arianna.garaglia@gmail.com"
+	})
 @SpringBootTest
 class BetaBooksApplicationTests {
 
