@@ -10,6 +10,7 @@ import com.betacom.betabooks.dto.inputs.CarrelloReq;
 import com.betacom.betabooks.dto.outputs.WishlistDTO;
 import com.betacom.betabooks.dto.outputs.AutoreDTO;
 import com.betacom.betabooks.dto.outputs.EditoreDTO;
+import com.betacom.betabooks.dto.outputs.FormatoLibroDTO;
 import com.betacom.betabooks.dto.outputs.LibroDTO;
 import com.betacom.betabooks.models.FormatoLibro;
 import com.betacom.betabooks.models.Libro;
@@ -20,6 +21,7 @@ import com.betacom.betabooks.repositories.IUtenteRepository;
 import com.betacom.betabooks.repositories.IWishlistRepository;
 import com.betacom.betabooks.services.interfaces.ICarrelloServices;
 import com.betacom.betabooks.services.interfaces.IWishlistServices;
+import com.betacom.betabooks.utils.Mapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -115,32 +117,33 @@ public class WishlistImpl implements IWishlistServices {
     }
 
     
-    private WishlistDTO toDTO(Wishlist w) {
+    public WishlistDTO toDTO(Wishlist w) {
         FormatoLibro formato = w.getFormatoLibro();
         Libro libro = formato.getLibro();
 
-        // 1. Mappa l'autore come oggetto
-        AutoreDTO autore = (libro.getAutore() != null) 
-            ? new AutoreDTO(libro.getAutore().getId(), libro.getAutore().getNome(), libro.getAutore().getCognome(), null, null, false) 
-            : null;
+        AutoreDTO autore = (libro.getAutore() != null) ? Mapper.buildAutoreDTO(libro.getAutore()) : null;
+        EditoreDTO editore = (libro.getEditore() != null) ? Mapper.buildEditoreDTO(libro.getEditore()) : null;
 
-        // 2. Mappa l'editore come oggetto
-        EditoreDTO editore = (libro.getEditore() != null) 
-            ? new EditoreDTO(libro.getEditore().getId(), libro.getEditore().getNome(), null, false) 
-            : null;
-
-        // 3. Costruisci il LibroDTO usando gli oggetti
         LibroDTO libroDTO = LibroDTO.builder()
                 .id(libro.getId())
                 .titolo(libro.getTitolo())
                 .autore(autore)
                 .editore(editore)
                 .build();
+        
+        FormatoLibroDTO formatoDTO = FormatoLibroDTO.builder()
+                .id(formato.getId())
+                .copertina(formato.getCopertina()) // L'immagine viene presa correttamente dal formato
+                .prezzo(formato.getPrezzo())
+                .tipoSupporto(formato.getTipoSupporto())
+                .build();
 
         return WishlistDTO.builder()
                 .id(w.getId())
                 .formatId(formato.getId())
                 .libro(libroDTO)
+                .formato(formatoDTO) // Il formato viene aggiunto al DTO
                 .build();
     }
+
 }

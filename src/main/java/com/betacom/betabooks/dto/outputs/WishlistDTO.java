@@ -15,5 +15,5 @@ public class WishlistDTO {
     private Long id;
     private LibroDTO libro; // Restituiamo il dettaglio del libro salvato
     private Long formatId;
-
+    private FormatoLibroDTO formato;
 }
