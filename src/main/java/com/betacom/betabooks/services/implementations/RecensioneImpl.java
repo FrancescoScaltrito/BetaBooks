@@ -141,5 +141,19 @@ public class RecensioneImpl implements IRecensioneServices{
 		List<Recensione> recensioni = recensioneR.findByLibroId(idLibro);
 		return Mapper.buildRecensioneDTO(recensioni);
 	}
+	
+	@Override
+	public List<RecensioneDTO> findByprofilo(Long idProfilo) throws Exception {
+		log.debug("RecensioneImpl - findByprofilo {}", idProfilo);
+		
+		if (idProfilo == null) {
+			throw new Exception("ID Profilo non può essere null");
+		}
+		
+		List<Recensione> recensioni = recensioneR.findByProfiloUtenteId(idProfilo);
+		log.debug("Recensioni trovate: {}", recensioni.size());
+		return Mapper.buildRecensioneDTO(recensioni);
+	}
+	
 
 }

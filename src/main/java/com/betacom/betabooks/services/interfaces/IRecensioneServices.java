@@ -18,6 +18,8 @@ public interface IRecensioneServices {
     List<RecensioneDTO> findAll() throws Exception;
 
     List<RecensioneDTO> findByLibro(Long idLibro) throws Exception;
+    
+    List<RecensioneDTO> findByprofilo(Long idProfilo) throws Exception;
 
 
 }

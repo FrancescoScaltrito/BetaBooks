@@ -117,5 +117,19 @@ public class RecensioneController {
         }
         return ResponseEntity.status(status).body(response);
     }
+	
+	@GetMapping("/getByProfilo")
+    public ResponseEntity<Object> findByProfilo (@RequestParam(required = true) Long idProfilo){
+        Object response = new Object();
+        HttpStatus status = HttpStatus.OK;
+        try {
+            response = recensioneS.findByprofilo(idProfilo);
+        } catch (Exception e) {
+            log.error("ERRORE RecensioneController - " + e.getMessage());
+            response = e.getMessage();
+            status = HttpStatus.BAD_REQUEST; 
+        }
+        return ResponseEntity.status(status).body(response);
+    }
 
 }
