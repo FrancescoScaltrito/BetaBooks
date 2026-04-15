@@ -27,7 +27,8 @@ import lombok.extern.slf4j.Slf4j;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestPropertySource(properties = {
 	    "database.username=postgres",
-	    "database.password=100720"
+	    "database.password=100720",
+	    "mail.sender=arianna.garaglia@gmail.com"
 	})
 public class AutoreControllerTest {
 

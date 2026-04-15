@@ -31,6 +31,7 @@ import com.betacom.betabooks.models.FormatoLibro;
 import com.betacom.betabooks.models.Indirizzo;
 import com.betacom.betabooks.models.Libro;
 import com.betacom.betabooks.models.Ordine;
+import com.betacom.betabooks.models.ProfiloUtente;
 import com.betacom.betabooks.models.Utente;
 import com.betacom.betabooks.repositories.IAutoreRepository;
 import com.betacom.betabooks.repositories.ICarrelloItemRepository;
@@ -40,9 +41,11 @@ import com.betacom.betabooks.repositories.IFormatoLibroRepository;
 import com.betacom.betabooks.repositories.IIndirizzoRepository;
 import com.betacom.betabooks.repositories.ILibroRepository;
 import com.betacom.betabooks.repositories.IOrdineRepository;
+import com.betacom.betabooks.repositories.IProfiloUtenteRepository;
 import com.betacom.betabooks.repositories.IUtenteRepository;
 import com.betacom.betabooks.response.Resp;
 
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -51,7 +54,8 @@ import lombok.extern.slf4j.Slf4j;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestPropertySource(properties = {
 	    "database.username=postgres",
-	    "database.password=100720"
+	    "database.password=100720",
+	    "mail.sender=arianna.garaglia@gmail.com"
 	})
 public class OrdineControllerTest {
 
@@ -85,6 +89,13 @@ public class OrdineControllerTest {
     @Autowired
     private IEditoreRepository editoreR;
 
+    // INIETTIAMO L'ENTITY MANAGER PER RISOLVERE IL PROBLEMA DELLA CACHE DI HIBERNATE
+    @Autowired
+    private EntityManager entityManager;
+    
+    @Autowired
+    private IProfiloUtenteRepository profiloR;
+
     private Long idUtente;
     private Long idIndirizzo;
     private Long idOrdine;
@@ -93,14 +104,23 @@ public class OrdineControllerTest {
     void setUp() {
         log.debug("Esecuzione setUp: Creazione dati fittizi per il test Ordine");
 
+        // 1. Crea Utente
         Utente u = new Utente();
         u.setEmail("ordine_test_" + System.currentTimeMillis() + "@betabooks.it");
         u.setPassword("Password123!");
         u.setRuolo(RuoloUtente.USER);
         u.setValidato(true);
-        u = utenteR.saveAndFlush(u);
+        u = utenteR.saveAndFlush(u); 
         idUtente = u.getId();
+        
+        ProfiloUtente profilo = new ProfiloUtente();
+        profilo.setUtente(u);
+        profilo.setNome("Mario");
+        profilo.setCognome("Rossi");
+        profilo.setTelefono("3331234567");
+        profiloR.saveAndFlush(profilo);
 
+        // 2. Crea Indirizzo di spedizione
         Indirizzo ind = new Indirizzo();
         ind.setUtente(u);
         ind.setVia("Via Roma 1");
@@ -112,16 +132,18 @@ public class OrdineControllerTest {
         ind = indirizzoR.saveAndFlush(ind);
         idIndirizzo = ind.getId();
 
+        // 3. Crea un Ordine pre-esistente nel database
         Ordine o = new Ordine();
         o.setUtente(u);
         o.setIndirizzo(ind);
-        o.setStato(StatoOrdine.values()[0]);
+        o.setStato(StatoOrdine.values()[0]); 
         o.setMetodoPagamento(MetodoPagamento.values()[0]);
-        o.setTotale(new BigDecimal("50.0"));
+        o.setTotale(BigDecimal.valueOf(50.0));
         o.setDataOrdine(LocalDateTime.now());
         o = ordineR.saveAndFlush(o);
         idOrdine = o.getId();
 
+        // 4. Prepara un Carrello PIENO per testare il checkout
         Carrello c = new Carrello();
         c.setUtente(u);
         c = carrelloR.saveAndFlush(c);
@@ -129,10 +151,12 @@ public class OrdineControllerTest {
         Autore a = new Autore();
         a.setNome("Dante");
         a.setCognome("Alighieri");
+        a.setAttivo(true); // <-- RISOLVE L'ERRORE DEL BOOLEAN NULL
         a = autoreR.saveAndFlush(a);
 
         Editore e = new Editore();
-        e.setNome("Mondadori");
+        e.setNome("Mondadori_" + System.currentTimeMillis());
+        e.setAttivo(true); // <-- RISOLVE L'ERRORE DEL BOOLEAN NULL
         e = editoreR.saveAndFlush(e);
 
         Libro l = new Libro();
@@ -143,16 +167,22 @@ public class OrdineControllerTest {
 
         FormatoLibro f = new FormatoLibro();
         f.setLibro(l);
-        f.setPrezzo(BigDecimal.valueOf(15.0));
+        f.setPrezzo(BigDecimal.valueOf(15.0)); // Usa setPrezzo o setPrezzoListino a seconda della tua entità
         f.setTipoSupporto(TipoSupporto.CARTACEO);
-        f.setQuantita(10);
+        f.setQuantita(10); 
+        f.setAttivo(true); // <-- RISOLVE L'ERRORE DEL BOOLEAN NULL
         f = formatoLibroR.saveAndFlush(f);
 
         CarrelloItem item = new CarrelloItem();
         item.setCarrello(c);
         item.setFormatoLibro(f);
         item.setQuantita(1);
+        item.setPrezzoUnitario(f.getPrezzo());
         carrelloItemR.saveAndFlush(item);
+
+        // SVUOTIAMO LA CACHE DI HIBERNATE!
+        // Altrimenti il Controller vedrà il carrello come "vuoto" perché legge il vecchio oggetto in memoria
+        entityManager.clear();
     }
 
     // ── CHECKOUT ─────────────────────────────────────────────────────────────────
@@ -223,8 +253,7 @@ public class OrdineControllerTest {
     @Order(7)
     public void getStoricoFiltratoSuccesso() {
         log.debug("TEST [7] getStoricoFiltrato - successo");
-        // Cerchiamo tutti gli ordini completati nell'ultimo mese
-        FiltroTemporale filtro = FiltroTemporale.values()[0]; // Es. ULTIMO_MESE
+        FiltroTemporale filtro = FiltroTemporale.values()[0]; 
         
         ResponseEntity<Resp> resp = ordineC.getStoricoFiltrato(idUtente, true, filtro);
         assertEquals(HttpStatus.OK, resp.getStatusCode());

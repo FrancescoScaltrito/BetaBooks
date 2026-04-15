@@ -6,7 +6,9 @@ import org.junit.platform.suite.api.Suite;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
+import com.betacom.betabooks.autore.AutoreControllerTest;
 import com.betacom.betabooks.carrello.CarrelloControllerTest;
+import com.betacom.betabooks.editore.EditoreControllerTest;
 import com.betacom.betabooks.libro.LibroControllerTest;
 import com.betacom.betabooks.ordine.OrdineControllerTest;
 import com.betacom.betabooks.recensione.RecensioneControllerTest;
@@ -17,6 +19,8 @@ import com.betacom.betabooks.profilo.ProfiloUtenteControllerTest;
 
 @Suite
 @SelectClasses({
+	AutoreControllerTest.class,
+	EditoreControllerTest.class,
     CarrelloControllerTest.class,
     OrdineControllerTest.class,
     LibroControllerTest.class,

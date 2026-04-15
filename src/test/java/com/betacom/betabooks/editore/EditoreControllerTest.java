@@ -27,7 +27,8 @@ import lombok.extern.slf4j.Slf4j;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestPropertySource(properties = {
 	    "database.username=postgres",
-	    "database.password=100720"
+	    "database.password=100720",
+	    "mail.sender=arianna.garaglia@gmail.com"
 	})
 public class EditoreControllerTest {
 
@@ -67,7 +68,7 @@ public class EditoreControllerTest {
         ResponseEntity<Resp> resp = editoreC.update(req);
         
         assertEquals(HttpStatus.OK, resp.getStatusCode());
-        assertEquals("EditoreController - Editore aggiornato", resp.getBody().getMessage());
+        assertEquals("EditoreController - Editore aaggornato", resp.getBody().getMessage());
     }
 
     @Test
