@@ -170,6 +170,8 @@ public class Mapper {
                 .prezzoUnitario(prezzoStorico)
                 .quantita(item.getQuantita())
                 .prezzoTotaleRiga(subTotale)
+                .tipoSupporto(item.getFormatoLibro().getTipoSupporto())
+                .tipoCopertina(item.getFormatoLibro().getTipoCopertina())
                 .build();
     }
 

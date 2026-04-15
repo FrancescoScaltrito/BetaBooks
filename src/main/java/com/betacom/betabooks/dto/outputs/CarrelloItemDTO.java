@@ -2,6 +2,9 @@ package com.betacom.betabooks.dto.outputs;
 
 import java.math.BigDecimal;
 
+import com.betacom.betabooks.enums.TipoCopertina;
+import com.betacom.betabooks.enums.TipoSupporto;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,4 +27,6 @@ public class CarrelloItemDTO {
     private String autoreCognome;
     private String editoreNome;
     private String copertina;
+    private TipoSupporto tipoSupporto;
+    private TipoCopertina tipoCopertina;
 }
